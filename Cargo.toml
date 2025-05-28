@@ -7,4 +7,7 @@ edition = "2024"
 [dependencies]
 
 egui = "0.31"
+eframe = "0.31"
+vector3d = "0.2.1"
+stl_io = "0.8.5"
 
