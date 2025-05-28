@@ -1,6 +1,7 @@
-use vector3d::Vector3d;
+use nalgebra::{Matrix3, Vector3};
 
-pub type Vector = Vector3d<f64>;
+pub type Vector = Vector3<f64>;
+pub type Matrix = Matrix3<f64>;
 
 pub struct Ray {
     origin: Vector,

@@ -1,4 +1,3 @@
-use vector3d::Vector3d;
 use crate::renderer::ray::Vector;
 use super::ray;
 
