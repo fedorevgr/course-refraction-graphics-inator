@@ -3,18 +3,20 @@ use crate::renderer::ray::Vector;
 use super::ray;
 
 
-struct Triangle {
-    normal: Vector,
-    idx: [usize; 3],
+#[derive(Debug)]
+pub struct Triangle {
+    pub normal: Vector,
+    pub idx: [usize; 3],
 }
 
-struct Model {
+#[derive(Debug)]
+pub struct Model {
     points: Vec<Vector>,
     triangles: Vec<Triangle>,
 }
 
 impl Model {
-    fn contruct(points: Vec<Vector>, triangles: Vec<Triangle>) -> Model {
+    pub fn new(points: Vec<Vector>, triangles: Vec<Triangle>) -> Model {
         Model { points, triangles }
     }
     

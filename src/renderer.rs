@@ -1,3 +1,3 @@
-mod ray;
-mod model;
-mod camera;
+pub mod ray;
+pub mod model;
+pub mod camera;
