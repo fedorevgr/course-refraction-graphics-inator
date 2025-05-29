@@ -1,26 +1,24 @@
-use nalgebra::Rotation3;
-
+use nalgebra::Unit;
 use super::ray::{Vector, Matrix};
+
 
 #[derive(Debug)]
 pub struct Dimensions {
-    pub width: i64,
-    pub height: i64,
+    pub width: usize,
+    pub height: usize,
 }
 
 #[derive(Debug)]
 pub struct Camera {
     pos: Vector,
-    dir: Vector,
+    dir: Unit<Vector>,
     
     fov: f64,
     pub dimensions: Dimensions
 }
 
-
-
 impl Camera {
-    pub fn new(pos: Vector, dir: Vector, fov: f64, dims: Dimensions) -> Self {
+    pub fn new(pos: Vector, dir: Unit<Vector>, fov: f64, dims: Dimensions) -> Self {
         Camera {
             pos,
             dir,
@@ -28,41 +26,39 @@ impl Camera {
             dimensions: dims,
         }
     }
-    pub fn pixel_vectors(&self) -> impl FnMut() -> Vector {
-        let fov_x  = self.fov;
+    
+    pub fn get_vector(&self, col: usize, row: usize) -> Option<Vector> {
+        if (col > self.dimensions.width) || (row > self.dimensions.height)
+        {
+            return None;
+        }
+        
         let fov_y = self.fov / self.dimensions.width as f64 * self.dimensions.height as f64;
         
-        let d_alpha = fov_x / (self.dimensions.width-1) as f64;
-        let d_beta = fov_y / (self.dimensions.height-1) as f64;
-        
-        let lim_x = -fov_x / 2.;
+        let lim_x = -self.fov / 2.;
         let lim_y = -fov_y / 2.;
-      
-        let mut row: i64 = 0;
-        let mut col: i64 = -1;
+        
+        let delta_col = self.fov / (self.dimensions.width - 1) as f64;
+        let delta_row = fov_y / (self.dimensions.height - 1) as f64;
+
+        let matrix_yaw = Matrix::from_euler_angles(0., 0., lim_x + delta_col * col as f64);
+        let matrix_pitch = Matrix::from_euler_angles(0., lim_y + delta_row * row as f64, 0.);
+
+        Some(matrix_pitch * (matrix_yaw * *self.dir))
+    }
+    
+    pub fn pixel_vectors(&self) -> impl FnMut() -> Vector {
+        let mut row: usize = 0;
+        let mut col: usize = 0;
         
         move || {
-            if col + 1 < self.dimensions.width {
-                col += 1;
-            }
-            else {
+            if col >= self.dimensions.width {
                 row += 1;
                 col = 0;
             }
-            // println!("{:#?}, {:#?}; {:#?}, {:#?}", row, col, lim_y + d_beta * (row as f64), lim_x + d_alpha * (col as f64));
-            let res_yaw: Vector = 
-            Rotation3::from_euler_angles(
-                0.,
-                0.,
-                lim_x + d_alpha * (col as f64)
-            ) * self.dir;
-            let res: Vector = Rotation3::from_euler_angles(
-                0.,
-                lim_y + d_beta * (row as f64),
-                0.
-            ) * res_yaw;
-            println!("{:#?}, {:#?}, {:#?}", row, col, res);
-            res
+            
+            col += 1;
+            self.get_vector(col-1, row).unwrap()
         }
     }
 }

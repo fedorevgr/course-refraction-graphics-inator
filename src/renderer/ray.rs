@@ -1,15 +1,16 @@
-use nalgebra::{Matrix3, Vector3};
+use nalgebra::{Matrix4, Vector4, Unit};
 
-pub type Vector = Vector3<f64>;
-pub type Matrix = Matrix3<f64>;
+
+pub type Vector = Vector4<f64>;
+pub type Matrix = Matrix4<f64>;
 
 pub struct Ray {
     origin: Vector,
-    direction: Vector
+    direction: Unit<Vector>
 }
 
 impl Ray {
-    fn new(origin: Vector, direction: Vector) -> Ray {
+    fn new(origin: Vector, direction: Unit<Vector>) -> Ray {
         Ray { origin, direction }
     }
 }

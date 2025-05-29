@@ -1,12 +1,12 @@
 use std::f64;
 use nalgebra as na;
-use nalgebra::Vector4;
+use nalgebra::{Unit, Vector4};
 use nalgebra::Matrix4;
 
 
 const FOV_X: f64 = f64::consts::FRAC_PI_3 * 2.0;
-const W: usize = 40;
-const H: usize = 30;
+const W: usize = 3;
+const H: usize = 2;
 
 const FOV_Y: f64 = FOV_X / W as f64 * H as f64;
 
@@ -31,6 +31,7 @@ fn proj(i: usize, j: usize) -> Option<Vector4<f64>> {
 }
 
 fn main() {
+    // let a: Unit<Vector4<f64>> = Unit::new_normalize(Vector4::new(1.0, 0., 0., 0.).normalize());
     println!("{:.3?}", proj(0, 0).unwrap());
     println!("{:.3?}", proj(W / 2, H / 2).unwrap());
     println!("{:.3?}", proj(0, H-1).unwrap());
