@@ -15,9 +15,9 @@ const LIM_Y: f64 = -FOV_Y / 2.0;
 const VECTOR: Vector3<f64> = Vector3::new(1.0, 0., 0.);
 
 
-fn proj(i: usize, j: usize) -> Vector3<f64> {
+fn proj(i: usize, j: usize) -> Option<Vector3<f64>> {
     if (i > W) || (j > H) {
-        panic!("Out of bound at index {}", i);
+        return None;
     }
     
     let delta_x = FOV_X / (W-1) as f64;
@@ -26,11 +26,12 @@ fn proj(i: usize, j: usize) -> Vector3<f64> {
     let matrix_yaw = na::Rotation3::from_euler_angles(0., 0., LIM_X + delta_x * i as f64);
     let matrix_pitch = na::Rotation3::from_euler_angles(0., LIM_Y + delta_y * j as f64, 0.);
     
-    matrix_pitch * (matrix_yaw * VECTOR)
+    Some(matrix_pitch * (matrix_yaw * VECTOR))
 }
 
 fn main() {
-    println!("{:.3?}", proj(0, 0));
-    println!("{:.3?}", proj(0, H-1));
-    println!("{:.3?}", proj(W-1, H-1));
+    println!("{:.3?}", proj(0, 0).unwrap());
+    println!("{:.3?}", proj(W / 2, H / 2).unwrap());
+    println!("{:.3?}", proj(0, H-1).unwrap());
+    println!("{:.3?}", proj(W-1, H-1).unwrap());
 }
