@@ -9,4 +9,9 @@ fn main() {
     println!("{:#?}", matrix * vector);
 
     println!("{:#?}", na::Matrix3::new_rotation(1.57));
+
+    let test: i64 = 0;
+    println!("{:#?}", test as f64);
 }
+
+
