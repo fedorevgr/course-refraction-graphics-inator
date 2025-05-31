@@ -9,6 +9,68 @@ use crate::renderer::model::Triangle;
 use crate::renderer::ray::{Ray, Vector};
 use image::{Rgb, RgbImage};
 
+const SPHERE_POS: Vector = Vector::new(2., 0., 0., 0.);
+const SPHERE_R_2: f64 = 0.5 * 0.5;
+
+const SPHERE_COL: Rgb<u8> = Rgb([255, 0, 0]);
+
+fn hit_sphere(ray: &Ray) -> Rgb<u8>
+{
+    let a = ray.direction.magnitude();
+    let b = 2. * ray.direction.dot(&SPHERE_POS.sub(ray.origin));
+    let c  = SPHERE_POS.sub(ray.origin).magnitude() - SPHERE_R_2;
+
+    if b * b - 4. * a * c < 0. {
+        Rgb([0, 0, 0])
+    }
+    else {
+        SPHERE_COL
+    }
+}
+
+const TORUS_R: f64 = 1. * 1.;
+const TORUS_K: f64 = 0.5 * 0.5;
+
+fn hit_torus(ray: &Ray) -> Rgb<u8>
+{
+    let step = 0.05;
+    let dir = ray.direction.normalize();
+    for i in 0..60 {
+        let t = step * i as f64;
+        let p = ray.origin + dir * t;
+        
+        if (p.magnitude_squared() + TORUS_R - TORUS_K).powi(2) < 4. * TORUS_R * (p.x.powi(2) + p.y.powi(2))
+        {
+            let norm = (p - (p - Vector::new(0., 0., p.z, 0.)).normalize()).dot(&p);
+            return Rgb([(155. * norm) as u8 + 100, 0, 0]);
+        }
+    }
+    Rgb([0, 0, 0])
+}
+
+fn main() {
+    let dims = Dimensions{width: 400, height: 300};
+
+    let cam = Camera::new(
+        Vector::new(-0., 0., -0.0, 0.),
+        0., -1.,
+        std::f64::consts::PI * 4.,
+        dims.clone()
+    );
+    println!("{:?}", cam);
+    
+    let mut image = RgbImage::new(dims.width as u32, dims.height as u32);
+    let mut gen_ray = cam.pixel_vectors();
+    for j in 0..cam.dimensions.height{
+        for i in 0..cam.dimensions.width{
+            image.put_pixel(i as u32, j as u32, hit_torus(&gen_ray()));
+        }
+    }
+    image.save("output.png").unwrap();
+    return;
+}
+
+
 // fn loading_model() {
 //     use std::fs::OpenOptions;
 //     let mut file = OpenOptions::new().read(true).open("mesh.stl").unwrap();
@@ -31,44 +93,11 @@ use image::{Rgb, RgbImage};
 //     println!("{:#?}", model);
 // }
 
-const SPHERE_POS: Vector = Vector::new(2., 0., 0., 0.);
-const SPHERE_R_2: f64 = 0.5 * 0.5;
 
-const SPHERE_COL: Rgb<u8> = Rgb([255, 0, 0]);
-
-fn hit_sphere(ray: &Ray) -> Rgb<u8>
-{
-    let a = ray.direction.magnitude();
-    let b = 2. * ray.direction.dot(&SPHERE_POS.sub(ray.origin));
-    let c  = SPHERE_POS.sub(ray.origin).magnitude() - SPHERE_R_2;
-
-    if b * b - 4. * a * c < 0. {
-        Rgb([0, 0, 0])
-    }
-    else {
-        SPHERE_COL
-    }
-
-}
-
-fn main() {
-    let dims = Dimensions{width: 400, height: 300};
-
-    let cam = Camera::new(
-        Vector::new(0.0, 0.0, 0.0, 0.),
-        0., 0.,
-        std::f64::consts::PI,
-        dims.clone()
-    );
-    println!("{:?}", cam);
-    
-    let mut image = RgbImage::new(dims.width as u32, dims.height as u32);
-    let mut gen_ray = cam.pixel_vectors();
-    for j in 0..cam.dimensions.height{
-        for i in 0..cam.dimensions.width{
-            image.put_pixel(i as u32, j as u32, hit_sphere(&gen_ray()));
-        }
-    }
-    image.save("output.png").unwrap();
-    return;
-}
+// let beta = ray.direction.dot(&ray.origin);
+// let gamma = ray.origin.magnitude_squared();
+// let delta = gamma + TORUS_R * TORUS_R - TORUS_K * TORUS_K;
+// let sigma = gamma - TORUS_R * TORUS_R - TORUS_K * TORUS_K;
+//
+// let b = 4. * beta;
+// let c = 2. * gamma - 4. * TORUS_R * TORUS_R * (ray.direction.);
