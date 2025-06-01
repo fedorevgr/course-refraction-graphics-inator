@@ -44,12 +44,12 @@ impl Camera {
         let matrix_pitch =
             Matrix::from_euler_angles(0., self.dir_angles.y + lim_y + delta_row * row as f64, 0.);
 
-        Some(Ray {
-            origin: self.pos,
-            direction: Unit::new_normalize(
+        Some(Ray::new(
+            self.pos,
+            Unit::new_normalize(
                 matrix_pitch * (matrix_yaw * Vector::new(1., 0., 0., 0.)),
             )
-        })
+        ))
     }
 
     pub fn pixel_vectors(&self) -> impl FnMut() -> Ray {
