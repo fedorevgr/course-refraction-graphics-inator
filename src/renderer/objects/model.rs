@@ -1,6 +1,5 @@
-use image::Rgb;
-use crate::renderer::ray::Vector;
-use super::ray::Ray;
+
+use crate::renderer::objects::ray::{Ray, RGB, Vector};
 
 
 #[derive(Debug)]
@@ -24,9 +23,22 @@ pub struct Triangle {
 
 #[derive(Debug)]
 pub struct Material {
-    pub color: Rgb<u8>,
-    pub emissive: Rgb<u8>,
-    pub roughness: f64
+    pub absorption: RGB, // main color
+    pub emissivity: RGB, // shine color
+
+    pub roughness: f64, // reflect note: RGB
+    pub transmittance: f64  // refract note: RGB
+}
+
+impl Material {
+    pub fn Default() -> Self {
+        Material{ 
+            absorption: RGB::from([128, 128, 128]), 
+            emissivity: RGB::from([0, 0, 0]), 
+            roughness: 1., 
+            transmittance: 0. 
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -48,5 +60,7 @@ impl Model {
         Model{center, radius, material}
     }
     
-    
+    pub fn hit(&self, ray: &Ray) -> Hit {
+        todo!()
+    }
 }

@@ -1,4 +1,4 @@
-use super::ray::{Matrix, Ray, Vector};
+use crate::renderer::objects::ray::{Matrix, Ray, Vector};
 use nalgebra::Unit;
 
 #[derive(Debug, Clone)]

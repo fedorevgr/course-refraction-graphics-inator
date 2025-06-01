@@ -5,12 +5,14 @@ use nalgebra::{Matrix4, Vector4, Unit};
 pub type Vector = Vector4<f64>;
 pub type Matrix = Matrix4<f64>;
 
+pub type RGB = Rgb<u8>;
+
 #[derive(Debug)]
 pub struct Ray {
     pub(crate) origin: Vector,
     pub(crate) direction: Unit<Vector>,
     
-    pub color: Rgb<u8>,
+    pub color: RGB,
 }
 
 impl Ray {

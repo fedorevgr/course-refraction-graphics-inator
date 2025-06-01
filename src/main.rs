@@ -4,9 +4,9 @@ use std::ops::Sub;
 
 use nalgebra::Unit;
 use renderer::*;
-use crate::renderer::camera::{Camera, Dimensions};
-use crate::renderer::model::Triangle;
-use crate::renderer::ray::{Ray, Vector};
+use renderer::objects::camera::{Camera, Dimensions};
+use renderer::objects::model::Triangle;
+use renderer::objects::ray::{Ray, Vector};
 use image::{Rgb, RgbImage};
 
 const SPHERE_POS: Vector = Vector::new(2., 0., 0., 0.);
