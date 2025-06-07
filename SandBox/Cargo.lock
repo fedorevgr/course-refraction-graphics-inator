@@ -10,6 +10,7 @@ dependencies = [
  "egui",
  "indicatif",
  "nalgebra",
+ "rand",
 ]
 
 [[package]]

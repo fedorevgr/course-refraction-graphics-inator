@@ -1,10 +1,13 @@
 use egui;
 use eframe;
 
+use nalgebra::{Vector3, Vector4, Matrix4};
+use rand::distributions::Standard;
 
-fn main() -> eframe::Result {
+#[allow(dead_code)]
+fn gui() -> eframe::Result {
     println!("Starting GUI");
-    
+
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default().with_inner_size([320.0, 240.0]),
         ..Default::default()
@@ -29,5 +32,15 @@ fn main() -> eframe::Result {
             ui.label(format!("Hello '{name}', age {age}"));
         });
     })
-    
+}
+
+
+fn main() {
+    let N = 10;
+
+    let vec = Vector4::new(1.0, -1.0, 1.0, 0.);
+    let normal = Vector4::new(0.0, 1.0, 0.0, 0.);
+
+    let reflected = vec - 2.0 * vec.dot(&normal) * normal;
+    println!("{:.3}, {:.3},  k = {:.3}, {:.3}", vec, normal, 2.0 * normal.dot(&vec), reflected);
 }
