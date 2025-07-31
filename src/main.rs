@@ -2,10 +2,8 @@ mod renderer;
 
 use std::ops::Sub;
 
-use nalgebra::Unit;
 use renderer::*;
 use renderer::objects::camera::{Camera, Dimensions};
-use renderer::objects::model::Triangle;
 use renderer::objects::ray::{Ray, Vector};
 use image::{Rgb, RgbImage};
 
@@ -93,11 +91,3 @@ fn main() {
 //     println!("{:#?}", model);
 // }
 
-
-// let beta = ray.direction.dot(&ray.origin);
-// let gamma = ray.origin.magnitude_squared();
-// let delta = gamma + TORUS_R * TORUS_R - TORUS_K * TORUS_K;
-// let sigma = gamma - TORUS_R * TORUS_R - TORUS_K * TORUS_K;
-//
-// let b = 4. * beta;
-// let c = 2. * gamma - 4. * TORUS_R * TORUS_R * (ray.direction.);
