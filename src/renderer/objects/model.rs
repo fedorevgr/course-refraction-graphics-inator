@@ -1,5 +1,5 @@
 use std::fmt::Debug;
-
+use image::Rgb;
 use crate::renderer::objects::ray::{Ray, Vector};
 
 pub mod material {
@@ -29,25 +29,45 @@ pub mod material {
         }
     }
 }
-
 use material::Material;
 
-#[derive(Debug)]
-pub struct Hit {
-    hit: bool,
-    ray: Vec<Ray>,
+#[derive(Debug, Clone)]
+pub struct Hit<'a> {
+    pub pos: Vector,
+    pub material: &'a Material,
+    pub normal: Vector,
+}
+
+impl<'a> Hit<'a> {
+    pub fn new(
+        pos: Vector,
+        material: &'a Material,
+        normal: Vector,
+    ) -> Self {
+        Hit { pos, material, normal }
+    }
 }
 
 pub trait Model
 where Self: Clone + Debug
 {
-    fn hit(&self, ray: &Ray) -> Hit;
+    fn hit(&self, ray: &Ray) -> Option<Hit>;
 }
 
 #[derive(Debug, Clone)]
 pub struct Triangle {
     pub normal: Vector,
     pub idx: [usize; 3],
+}
+
+impl Triangle {
+    pub fn point_in(&self, point: &Vector) -> bool {
+        true // todo
+    }
+
+    pub fn intersect(&self, ray: &Ray) -> f64 {
+        0. // todo
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -57,11 +77,23 @@ pub struct TriangleModel {
 }
 
 impl TriangleModel {
-    // todo: new
+
 }
 
 impl Model for TriangleModel {
-    fn hit(&self, ray: &Ray) -> Hit {
+    fn hit(&self, ray: &Ray) -> Option<Hit> {
+
+        for triangle in &self.triangles {
+            let t = triangle.intersect(ray);
+            if t >= 0. {
+                let hit_pos = ray.origin + ray.direction.scale(t);
+
+                if triangle.point_in(&hit_pos) {
+                    
+                }
+            }
+        }
+
         todo!()
     }
 }
@@ -70,18 +102,35 @@ impl Model for TriangleModel {
 #[derive(Debug, Clone)]
 pub struct SphereModel {
     center: Vector,
-    radius: f64,
+    radius_sq: f64,
     material: Material
 }
 
 impl SphereModel {
     pub fn new(center: Vector, radius: f64, material: Material) -> SphereModel {
-        SphereModel {center, radius, material}
+        SphereModel {center, radius_sq: radius * radius, material}
     }
 }
 
 impl Model for SphereModel {
-    fn hit(&self, ray: &Ray) -> Hit {
-        todo!()
+    fn hit(&self, ray: &Ray) -> Option<Hit> {
+        let b = 2. * ray.direction.dot(&(self.center - ray.origin));
+        let c  = (self.center - ray.origin).magnitude() - self.radius_sq;
+
+        let d = b * b - 4. * c;
+        if d < 0. {
+            None
+        }
+        else {
+            let t = (-b - d.sqrt()) / 2.;
+            let hit_pos = ray.origin + ray.direction.scale(t);
+            Some(
+                Hit::new(
+                    hit_pos,
+                    &self.material,
+                hit_pos - self.center
+                )
+            )
+        }
     }
 }

@@ -9,8 +9,8 @@ pub type RGB = Rgb<u8>;
 
 #[derive(Debug)]
 pub struct Ray {
-    pub(crate) origin: Vector,
-    pub(crate) direction: Unit<Vector>,
+    pub origin: Vector,
+    pub direction: Unit<Vector>,
     
     pub color: RGB,
 }
