@@ -8,9 +8,11 @@ use renderer::objects::material::Material;
 use renderer::objects::model::SphereModel;
 use renderer::scene::Scene;
 use renderer::{Renderer, SimpleRenderer};
+use crate::renderer::objects::material;
+use crate::renderer::objects::material::MaterialBuilder;
 
 fn main() {
-    let dims = Dimensions{width: 400, height: 300};
+    let dims = Dimensions{width: 800, height: 600};
 
     let cam = PerspectiveCamera::new(
       Vector::new(0., -10., 0., 0.),
@@ -20,7 +22,7 @@ fn main() {
     );
 
     let renderer = SimpleRenderer::new(Scene::new(vec![
-        SphereModel::new(Vector::new(0., 0., 0., 0.), 1., Material::marble())
+        SphereModel::new(Vector::new(0., 0., 0., 0.), 1., MaterialBuilder::default().build().unwrap()),
     ]));
 
     let mut image = RgbImage::new(dims.width as u32, dims.height as u32);
@@ -28,7 +30,7 @@ fn main() {
         for i in 0..cam.get_dimensions().width{
             let ray = cam.gen_ray(i, j);
             let col = renderer.cast(&ray);
-            image.put_pixel(i as u32, j as u32, Rgb::from([col[0].0, col[1].0, col[2].0]));
+            image.put_pixel(i as u32, j as u32, Rgb::from([col[0], col[1], col[2]]));
         }
     }
     image.save("output.png").unwrap();
