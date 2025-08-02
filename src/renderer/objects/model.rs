@@ -19,7 +19,7 @@ pub struct Triangle {
 }
 
 impl Triangle {
-    pub fn new(normal: Unit, points: &Vec<Vector>, idx: [usize; 3]) -> Self {
+    pub fn new(normal: Unit, points: &[Vector; 3], idx: [usize; 3]) -> Self {
         Triangle {
             normal,
             points: [points[idx[0]], points[idx[1]], points[idx[2]]],
@@ -38,7 +38,7 @@ impl Triangle {
     }
 
     pub fn intersect(&self, ray: &Ray) -> f64 {
-        (&self.points[0] - ray.origin).dot(&self.normal) / ray.direction.dot(&self.normal)
+        (self.points[0] - ray.origin).dot(&self.normal) / ray.direction.dot(&self.normal)
     }
 }
 
