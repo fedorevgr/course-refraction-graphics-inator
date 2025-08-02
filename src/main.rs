@@ -3,7 +3,7 @@ mod renderer;
 use std::ops::Sub;
 
 use renderer::*;
-use renderer::objects::camera::{Camera, Dimensions};
+use renderer::objects::camera::{FishEyeCamera, Dimensions};
 use renderer::objects::ray::{Ray, Vector};
 use image::{Rgb, RgbImage};
 
@@ -49,7 +49,7 @@ fn hit_torus(ray: &Ray) -> Rgb<u8>
 fn main() {
     let dims = Dimensions{width: 400, height: 300};
 
-    let cam = Camera::new(
+    let cam = FishEyeCamera::new(
         Vector::new(-0., 0., -0.0, 0.),
         0., -1.,
         std::f64::consts::PI * 4.,

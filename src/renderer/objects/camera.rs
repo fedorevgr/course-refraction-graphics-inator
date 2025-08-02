@@ -1,5 +1,8 @@
-use crate::renderer::objects::ray::{Matrix, Ray, Vector};
-use nalgebra::Unit;
+use crate::renderer::objects::ray::{Matrix, Ray, Vector, Unit};
+
+pub trait Camera {
+    fn gen_ray(&self, x: usize, y: usize) -> Ray;
+}
 
 #[derive(Debug, Clone)]
 pub struct Dimensions {
@@ -8,7 +11,7 @@ pub struct Dimensions {
 }
 
 #[derive(Debug)]
-pub struct Camera {
+pub struct FishEyeCamera {
     pos: Vector,
     dir_angles: Vector,
 
@@ -16,9 +19,9 @@ pub struct Camera {
     pub dimensions: Dimensions,
 }
 
-impl Camera {
+impl FishEyeCamera {
     pub fn new(pos: Vector, yaw: f64, pitch: f64, fov: f64, dims: Dimensions) -> Self {
-        Camera {
+        FishEyeCamera {
             pos,
             dir_angles: Vector::new(0., pitch, yaw, 0.),
             fov,
@@ -65,5 +68,11 @@ impl Camera {
             col += 1;
             self.get_vector(col - 1, row).unwrap()
         }
+    }
+}
+
+impl Camera for FishEyeCamera {
+    fn gen_ray(&self, x: usize, y: usize) -> Ray {
+        self.get_vector(x, y).unwrap()
     }
 }

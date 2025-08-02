@@ -1,79 +1,48 @@
 use std::fmt::Debug;
-use image::Rgb;
-use crate::renderer::objects::ray::{Ray, Vector};
-
-pub mod material {
-    use crate::renderer::objects::ray::RGB;
-    
-    #[derive(Debug, Clone)]
-    pub struct Material {
-        pub absorption: RGB, // main color
-        pub emissivity: RGB, // shine color
-
-        pub roughness: f64, // reflect note: RGB
-        pub transmittance: f64  // refract note: RGB
-    }
-
-    impl Material {
-        // todo
-    }
-
-    impl Default for Material {
-        fn default() -> Self {
-            Material{
-                absorption: RGB::from([128, 128, 128]),
-                emissivity: RGB::from([0, 0, 0]),
-                roughness: 1.,
-                transmittance: 0.
-            }
-        }
-    }
-}
-use material::Material;
-
-#[derive(Debug, Clone)]
-pub struct Hit<'a> {
-    pub pos: Vector,
-    pub material: &'a Material,
-    pub normal: Vector,
-}
-
-impl<'a> Hit<'a> {
-    pub fn new(
-        pos: Vector,
-        material: &'a Material,
-        normal: Vector,
-    ) -> Self {
-        Hit { pos, material, normal }
-    }
-}
+use crate::renderer::objects::ray::{Ray, Vector, Unit};
+use crate::renderer::objects::material::Material;
+use crate::renderer::objects::hit::Hit;
 
 pub trait Model
-where Self: Clone + Debug
 {
     fn hit(&self, ray: &Ray) -> Option<Hit>;
 }
 
 #[derive(Debug, Clone)]
 pub struct Triangle {
-    pub normal: Vector,
-    pub idx: [usize; 3],
+    pub normal: Unit,
+    pub points: [Vector; 3],
+    area: f64
 }
 
 impl Triangle {
+    pub fn new(normal: Unit, points: &Vec<Vector>, idx: [usize; 3]) -> Self {
+        Triangle {
+            normal,
+            points: [points[idx[0]], points[idx[1]], points[idx[2]]],
+            area: (points[idx[2]] - points[idx[0]]).cross(&(points[idx[1]] - points[idx[0]])).norm().abs() / 2.
+        }
+    }
+
     pub fn point_in(&self, point: &Vector) -> bool {
-        true // todo
+        let mut area = self.area;
+        for i in 0..3 {
+            let from = self.points[i];
+            let next = self.points[(i + 1) % 3];
+            area -= (from - next).cross(&(point - from)).norm().abs() / 2.;
+        }
+        area.abs() < f64::EPSILON
     }
 
     pub fn intersect(&self, ray: &Ray) -> f64 {
-        0. // todo
+        (&self.points[0] - ray.origin).dot(&self.normal) / ray.direction.dot(&self.normal)
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct TriangleModel {
-    points: Vec<Vector>,
     triangles: Vec<Triangle>,
+    material: Material
 }
 
 impl TriangleModel {
@@ -83,18 +52,29 @@ impl TriangleModel {
 impl Model for TriangleModel {
     fn hit(&self, ray: &Ray) -> Option<Hit> {
 
-        for triangle in &self.triangles {
-            let t = triangle.intersect(ray);
-            if t >= 0. {
-                let hit_pos = ray.origin + ray.direction.scale(t);
+        let mut min_t = f64::INFINITY;
+        let mut min_hit: Option<Hit> = None;
 
-                if triangle.point_in(&hit_pos) {
-                    
-                }
+        self.triangles.iter().for_each(|triangle| {
+            if triangle.normal.dot(&ray.direction) < 0. {
+                return;
             }
-        }
 
-        todo!()
+            let t = triangle.intersect(ray);
+
+            if t < 0. || min_t <= t {
+                return;
+            }
+
+            let hit_pos = ray.origin + ray.direction.scale(t);
+
+            if triangle.point_in(&hit_pos) {
+                min_t = t;
+                min_hit = Some(Hit::new(t, hit_pos, &self.material, triangle.normal));
+            }
+        });
+
+        min_hit
     }
 }
 
@@ -126,9 +106,10 @@ impl Model for SphereModel {
             let hit_pos = ray.origin + ray.direction.scale(t);
             Some(
                 Hit::new(
+                    t,
                     hit_pos,
                     &self.material,
-                hit_pos - self.center
+                Unit::new_normalize(hit_pos - self.center)
                 )
             )
         }
