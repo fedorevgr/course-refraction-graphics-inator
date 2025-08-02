@@ -1,13 +1,14 @@
 mod renderer;
 
-use image::{Rgb, RgbImage};
+use image::{RgbImage};
 
 use renderer::objects::camera::{Dimensions, Camera, PerspectiveCamera};
 use renderer::objects::ray::{Vector};
-use renderer::objects::material::Material;
+use renderer::objects::material::{Material, Rgb};
 use renderer::objects::model::SphereModel;
 use renderer::scene::Scene;
 use renderer::{Renderer, SimpleRenderer};
+use crate::renderer::objects::material::MaterialBuilder;
 
 fn main() {
     let dims = Dimensions{width: 800, height: 600};
@@ -21,7 +22,13 @@ fn main() {
 
     let renderer = SimpleRenderer::new(Scene::new(vec![
         SphereModel::new(Vector::new(0., 0., 0., 0.), 1., Material::metallic()),
-        SphereModel::new(Vector::new(1., -2., 0., 0.), 0.5, Material::marble())
+        SphereModel::new(Vector::new(1., -2., 0., 0.), 0.5, Material::marble()),
+        SphereModel::new(Vector::new(-1., 2., 0., 0.), 1.5,
+                         MaterialBuilder::default()
+                             .color(Rgb::new(140, 200, 80))
+                             .metallic(Rgb::new(120, 120, 120))
+                             .roughness(Rgb::new(100, 100, 100))
+                             .k(4.).build().unwrap())
     ]));
 
     let mut image = RgbImage::new(dims.width as u32, dims.height as u32);
@@ -29,7 +36,7 @@ fn main() {
         for i in 0..cam.get_dimensions().width{
             let ray = cam.gen_ray(i, j);
             let col = renderer.cast(&ray);
-            image.put_pixel(i as u32, j as u32, Rgb::from([col[0], col[1], col[2]]));
+            image.put_pixel(i as u32, j as u32, image::Rgb::from([col[0], col[1], col[2]]));
         }
     }
     image.save("output.png").unwrap();
