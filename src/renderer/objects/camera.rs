@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use crate::renderer::objects::ray::{Matrix, Ray, Vector, Unit, Vector3};
 
 pub trait Camera {
@@ -32,11 +34,6 @@ impl FishEyeCamera {
         }
     }
 
-    pub fn facing(position: Vector, target: Vector) -> Self {
-        let dir = position - target;
-        todo!()
-    }
-
     pub fn get_vector(&self, col: usize, row: usize) -> Option<Ray> {
         if (col > self.dimensions.width) || (row > self.dimensions.height) {
             return None;
@@ -61,21 +58,6 @@ impl FishEyeCamera {
                 matrix_pitch * (matrix_yaw * Vector::new(0., 0., -1., 0.)),
             )
         ))
-    }
-
-    pub fn pixel_vectors(&self) -> impl FnMut() -> Ray {
-        let mut row: usize = 0;
-        let mut col: usize = 0;
-
-        move || {
-            if col >= self.dimensions.width {
-                row += 1;
-                col = 0;
-            }
-
-            col += 1;
-            self.get_vector(col - 1, row).unwrap()
-        }
     }
 }
 

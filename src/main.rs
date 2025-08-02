@@ -2,14 +2,12 @@ mod renderer;
 
 use image::{Rgb, RgbImage};
 
-use renderer::objects::camera::{FishEyeCamera, Dimensions, Camera, PerspectiveCamera};
+use renderer::objects::camera::{Dimensions, Camera, PerspectiveCamera};
 use renderer::objects::ray::{Vector};
 use renderer::objects::material::Material;
 use renderer::objects::model::SphereModel;
 use renderer::scene::Scene;
 use renderer::{Renderer, SimpleRenderer};
-use crate::renderer::objects::material;
-use crate::renderer::objects::material::MaterialBuilder;
 
 fn main() {
     let dims = Dimensions{width: 800, height: 600};
@@ -22,7 +20,8 @@ fn main() {
     );
 
     let renderer = SimpleRenderer::new(Scene::new(vec![
-        SphereModel::new(Vector::new(0., 0., 0., 0.), 1., MaterialBuilder::default().build().unwrap()),
+        SphereModel::new(Vector::new(0., 0., 0., 0.), 1., Material::metallic()),
+        SphereModel::new(Vector::new(1., -2., 0., 0.), 0.5, Material::marble())
     ]));
 
     let mut image = RgbImage::new(dims.width as u32, dims.height as u32);

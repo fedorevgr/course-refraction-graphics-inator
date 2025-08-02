@@ -43,7 +43,7 @@ impl<M: Model> Renderer for SimpleRenderer<M> {
         match self.scene.intersect(ray) {
             None => { self.background.color },
             Some(hit) => {
-                let cos_reflection = ((self.light - hit.pos).normalize().dot(&hit.normal).max(0.) * 255.) as u8;
+                let cos_reflection = ((self.light - hit.pos).normalize().dot(&hit.normal).max(0.).powf(hit.material.k) * 255.) as u8;
 
                 let cos_diffusive = (ray.direction.dot(&-hit.normal).max(0.) * 255.) as u8;
 

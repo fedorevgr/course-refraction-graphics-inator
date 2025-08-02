@@ -1,5 +1,7 @@
+#![allow(dead_code)]
+
 use std::fmt::Debug;
-use image::Rgb;
+
 use crate::renderer::objects::ray::{Ray, Vector, Unit};
 use crate::renderer::objects::material::Material;
 use crate::renderer::objects::hit::Hit;
