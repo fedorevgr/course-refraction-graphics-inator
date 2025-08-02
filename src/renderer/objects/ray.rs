@@ -1,25 +1,31 @@
-use image::Rgb;
 use nalgebra::{Matrix4, Vector4};
+use nalgebra::Vector3 as V3;
 use nalgebra::Unit as U;
+pub use std::num::Saturating as S;
+pub use std::num::Wrapping as W;
 
 
 pub type Vector = Vector4<f64>;
+pub type Vector3 = V3<f64>;
 pub type Unit = U<Vector>;
+pub type Unit3 = U<Vector3>;
 
 pub type Matrix = Matrix4<f64>;
 
-pub type RGB = Rgb<u8>;
+pub type Rgb = V3<S<u8>>;
+pub type FLike = V3<W<u8>>;
 
 #[derive(Debug)]
 pub struct Ray {
     pub origin: Vector,
     pub direction: Unit,
     
-    pub color: RGB,
+    pub color: Rgb,
 }
 
 impl Ray {
     pub fn new(origin: Vector, direction: Unit) -> Ray {
-        Ray { origin, direction, color: Rgb([0, 0, 0]) }
+        Ray { origin, direction, color: Rgb::from([S(0), S(0), S(0)]) }
     }
 }
+

@@ -1,7 +1,9 @@
-use crate::renderer::objects::ray::{Matrix, Ray, Vector, Unit};
+use crate::renderer::objects::ray::{Matrix, Ray, Vector, Unit, Vector3};
 
 pub trait Camera {
-    fn gen_ray(&self, x: usize, y: usize) -> Ray;
+    fn gen_ray(&self, u: usize, v: usize) -> Ray;
+
+    fn get_dimensions(&self) -> &Dimensions;
 }
 
 #[derive(Debug, Clone)]
@@ -19,6 +21,7 @@ pub struct FishEyeCamera {
     pub dimensions: Dimensions,
 }
 
+// todo: forgot what it does
 impl FishEyeCamera {
     pub fn new(pos: Vector, yaw: f64, pitch: f64, fov: f64, dims: Dimensions) -> Self {
         FishEyeCamera {
@@ -27,6 +30,11 @@ impl FishEyeCamera {
             fov,
             dimensions: dims,
         }
+    }
+
+    pub fn facing(position: Vector, target: Vector) -> Self {
+        let dir = position - target;
+        todo!()
     }
 
     pub fn get_vector(&self, col: usize, row: usize) -> Option<Ray> {
@@ -50,7 +58,7 @@ impl FishEyeCamera {
         Some(Ray::new(
             self.pos,
             Unit::new_normalize(
-                matrix_pitch * (matrix_yaw * Vector::new(1., 0., 0., 0.)),
+                matrix_pitch * (matrix_yaw * Vector::new(0., 0., -1., 0.)),
             )
         ))
     }
@@ -72,7 +80,69 @@ impl FishEyeCamera {
 }
 
 impl Camera for FishEyeCamera {
-    fn gen_ray(&self, x: usize, y: usize) -> Ray {
-        self.get_vector(x, y).unwrap()
+    fn gen_ray(&self, u: usize, v: usize) -> Ray {
+        self.get_vector(u, v).unwrap()
+    }
+    fn get_dimensions(&self) -> &Dimensions {
+        &self.dimensions
+    }
+}
+
+pub struct PerspectiveCamera {
+    pos: Vector,
+    pitch: f64,
+    yaw: f64,
+    fov: f64,
+    pub dims: Dimensions,
+}
+
+impl PerspectiveCamera {
+    pub fn new(pos: Vector, target: Vector, dims: Dimensions, fov: f64) -> Self {
+        let dir = Unit::new_normalize(target - pos);
+        let pitch = dir.dot(&Vector::z_axis()).acos();
+        let mut yaw = dir.dot(&Vector::y_axis()).acos();
+
+        if dir.dot(&Vector::x_axis()) > 0. {
+            yaw *= -1.;
+        }
+
+        PerspectiveCamera {
+            pitch,
+            yaw,
+            pos,
+            dims,
+            fov
+        }
+    }
+
+    fn project(&self, x: usize, y: usize) -> Vector {
+        let aspect = self.dims.height as f64 / self.dims.width as f64;
+        let tan_hor_fov = (self.fov / 2.).tan();
+        let tan_ver_fov = tan_hor_fov * aspect;
+        let hor_step = tan_hor_fov / (self.dims.width as f64 / 2.);
+        let ver_step = -tan_ver_fov / (self.dims.height as f64 / 2.);
+
+        Vector::new(hor_step * x as f64 - tan_hor_fov, ver_step * y as f64 + tan_ver_fov, -1., 0.)
+    }
+
+    fn transition(&self) -> Matrix {
+        Matrix::new_rotation(Vector3::new(self.pitch, 0., self.yaw))
+    }
+
+}
+
+impl Camera for PerspectiveCamera {
+    fn gen_ray(&self, u: usize, v: usize) -> Ray {
+        let uv = self.project(u, v);
+        let projected = self.transition() * uv;
+
+        Ray::new(
+            self.pos,
+            Unit::new_normalize(projected)
+        )
+    }
+
+    fn get_dimensions(&self) -> &Dimensions {
+        &self.dims
     }
 }

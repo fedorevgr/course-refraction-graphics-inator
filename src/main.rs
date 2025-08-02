@@ -1,71 +1,37 @@
 mod renderer;
 
-use std::ops::Sub;
-
-use renderer::*;
-use renderer::objects::camera::{FishEyeCamera, Dimensions};
-use renderer::objects::ray::{Ray, Vector};
 use image::{Rgb, RgbImage};
 
-const SPHERE_POS: Vector = Vector::new(2., 0., 0., 0.);
-const SPHERE_R_2: f64 = 0.5 * 0.5;
-
-const SPHERE_COL: Rgb<u8> = Rgb([255, 0, 0]);
-
-fn hit_sphere(ray: &Ray) -> Rgb<u8>
-{
-    let a = ray.direction.magnitude();
-    let b = 2. * ray.direction.dot(&SPHERE_POS.sub(ray.origin));
-    let c  = SPHERE_POS.sub(ray.origin).magnitude() - SPHERE_R_2;
-
-    if b * b - 4. * a * c < 0. {
-        Rgb([0, 0, 0])
-    }
-    else {
-        SPHERE_COL
-    }
-}
-
-const TORUS_R: f64 = 1. * 1.;
-const TORUS_K: f64 = 0.5 * 0.5;
-
-fn hit_torus(ray: &Ray) -> Rgb<u8>
-{
-    let step = 0.05;
-    let dir = ray.direction.normalize();
-    for i in 0..60 {
-        let t = step * i as f64;
-        let p = ray.origin + dir * t;
-        
-        if (p.magnitude_squared() + TORUS_R - TORUS_K).powi(2) < 4. * TORUS_R * (p.x.powi(2) + p.y.powi(2))
-        {
-            let norm = (p - (p - Vector::new(0., 0., p.z, 0.)).normalize()).dot(&p);
-            return Rgb([(155. * norm) as u8 + 100, 0, 0]);
-        }
-    }
-    Rgb([0, 0, 0])
-}
+use renderer::objects::camera::{FishEyeCamera, Dimensions, Camera, PerspectiveCamera};
+use renderer::objects::ray::{Vector};
+use renderer::objects::material::Material;
+use renderer::objects::model::SphereModel;
+use renderer::scene::Scene;
+use renderer::{Renderer, SimpleRenderer};
 
 fn main() {
     let dims = Dimensions{width: 400, height: 300};
 
-    let cam = FishEyeCamera::new(
-        Vector::new(-0., 0., -0.0, 0.),
-        0., -1.,
-        std::f64::consts::PI * 4.,
-        dims.clone()
+    let cam = PerspectiveCamera::new(
+      Vector::new(0., -10., 0., 0.),
+      Vector::new(0., 0., 0., 0.),
+      dims.clone(),
+      std::f64::consts::FRAC_PI_6
     );
-    println!("{:?}", cam);
-    
+
+    let renderer = SimpleRenderer::new(Scene::new(vec![
+        SphereModel::new(Vector::new(0., 0., 0., 0.), 1., Material::marble())
+    ]));
+
     let mut image = RgbImage::new(dims.width as u32, dims.height as u32);
-    let mut gen_ray = cam.pixel_vectors();
-    for j in 0..cam.dimensions.height{
-        for i in 0..cam.dimensions.width{
-            image.put_pixel(i as u32, j as u32, hit_torus(&gen_ray()));
+    for j in 0..cam.get_dimensions().height{
+        for i in 0..cam.get_dimensions().width{
+            let ray = cam.gen_ray(i, j);
+            let col = renderer.cast(&ray);
+            image.put_pixel(i as u32, j as u32, Rgb::from([col[0].0, col[1].0, col[2].0]));
         }
     }
     image.save("output.png").unwrap();
-    return;
 }
 
 

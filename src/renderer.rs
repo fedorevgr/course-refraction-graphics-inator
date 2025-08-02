@@ -1,41 +1,46 @@
 pub mod scene;
 pub mod objects;
 
-use image::flat::NormalForm::Unaliased;
-use nalgebra::Unit;
 use scene::Scene;
 
-use objects::ray::Ray;
+use objects::ray::{Ray, Rgb, S, W};
 use objects::model::Model;
-use crate::renderer::objects::hit::Hit;
-use crate::renderer::objects::material::Material;
-use crate::renderer::objects::ray::Vector;
+use objects::material::Material;
+use objects::ray::Vector;
+
 
 pub trait Renderer {
-    fn cast(&self, ray: &Ray) -> image::Rgb<u8>;
+    fn cast(&self, ray: &Ray) -> Rgb;
 }
 
 #[derive(Clone, Debug)]
 pub struct SimpleRenderer<M: Model> {
     scene: Scene<M>,
-    background: Material
+    background: Material,
+    light: Vector
 }
 
 impl<M: Model> SimpleRenderer<M> {    
     pub fn new(scene: Scene<M>) -> SimpleRenderer<M> {
-        SimpleRenderer { scene, background: Material::default() }
+        SimpleRenderer {
+            scene,
+            background: Material::default(),
+            light: Vector::new(10., 10., 10., 0.)
+        }
     }
 }
 
 impl<M: Model> Renderer for SimpleRenderer<M> {
-    fn cast(&self, ray: &Ray) -> image::Rgb<u8> {
-        self.scene.intersect(ray).unwrap_or(
-            Hit::new(
-                0., 
-                Vector::zeros(), 
-                &self.background, 
-                Unit::new_normalize(Vector::new(1., 0., 0., 0.))
-            )
-        ).material.color
+    fn cast(&self, ray: &Ray) -> Rgb {
+        match self.scene.intersect(ray) {
+            None => { self.background.color },
+            Some(hit) => {
+                let cos_reflection = W(((self.light - hit.pos).normalize().dot(&hit.normal).max(0.) * 256.) as u8);
+                let cos_diffusive = W((ray.direction.dot(&-hit.normal).max(0.) * 256.) as u8);
+
+                hit.material.color.component_mul(&(hit.material.roughness * cos_diffusive)) +
+                     Rgb::new(S(255), S(255), S(255)).component_mul(&(hit.material.metallic * cos_reflection))
+            }
+        }
     }
 }
