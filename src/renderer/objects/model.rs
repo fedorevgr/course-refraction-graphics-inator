@@ -39,7 +39,10 @@ impl Triangle {
         let mut area = self.area;
         for i in 0..3 {
             let side = Vector3::from_homogeneous(self.points[i] - self.points[(i + 1) % 3]).unwrap();
-            let to_point = Vector3::from_homogeneous(point - self.points[i]).unwrap();
+            let to_point = Vector3::from_homogeneous(point - self.points[i]).unwrap_or_else( || {
+                println!("Stop");
+                Vector3::from_homogeneous(point.clone()).unwrap()
+            });
             area -= side.cross(&to_point).norm().abs() / 2.;
         }
         area.abs() <= Self::EPSILON
@@ -73,14 +76,20 @@ impl TriangleModel {
         let triangles = stl
             .faces
             .iter()
-            .map(|face| {
-                Triangle::new(
-                    Unit::new_unchecked(Vector::new(
-                        face.normal[0].into(),
-                        face.normal[1].into(),
-                        face.normal[2].into(),
-                        0.,
-                    )),
+            .filter_map(|face| {
+                let norm = Vector::new(
+                    face.normal[0].into(),
+                    face.normal[1].into(),
+                    face.normal[2].into(),
+                    0.,
+                );
+
+                if (norm.magnitude_squared() - 1.).abs() >= 0.0001 {
+                    return None;
+                }
+
+                Some(Triangle::new(
+                    Unit::new_unchecked(norm),
                     &face.vertices.map(|idx| {
                         Vector3::new(
                             stl.vertices[idx].0[0].into(),
@@ -88,7 +97,7 @@ impl TriangleModel {
                             stl.vertices[idx].0[2].into()
                         )
                     }),
-                )
+                ))
             })
             .collect();
 

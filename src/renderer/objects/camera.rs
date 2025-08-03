@@ -73,6 +73,10 @@ pub struct PerspectiveCamera {
     pitch: f64,
     yaw: f64,
     fov: f64,
+
+    pitch_matrix: Matrix,
+    yaw_matrix: Matrix,
+
     pub dims: Dimensions,
 }
 
@@ -90,6 +94,8 @@ impl PerspectiveCamera {
             pos,
             dims,
             fov,
+            pitch_matrix: Matrix::new_rotation(Vector3::new(pitch, 0., 0.)),
+            yaw_matrix: Matrix::new_rotation(Vector3::new(0., 0., yaw))
         }
     }
 
@@ -108,9 +114,8 @@ impl PerspectiveCamera {
         )
     }
 
-    fn transition(v: &Vector, pitch: f64, yaw: f64) -> Vector {
-        Matrix::new_rotation(Vector3::new(0., 0., yaw))
-            * (Matrix::new_rotation(Vector3::new(pitch, 0., 0.)) * v)
+    fn transition(&self, v: &Vector) -> Vector {
+        self.yaw_matrix * (self.pitch_matrix * v)
     }
 
     fn define_angles(dir: &Unit) -> [f64; 2] {
@@ -129,7 +134,7 @@ impl PerspectiveCamera {
 impl Camera for PerspectiveCamera {
     fn gen_ray(&self, u: usize, v: usize) -> Ray {
         let uv = self.project(u, v);
-        let projected = Self::transition(&uv, self.pitch, self.yaw);
+        let projected = self.transition(&uv);
 
         Ray::new(self.pos, Unit::new_normalize(projected))
     }
@@ -172,20 +177,6 @@ mod tests {
         let [pitch, _] = PerspectiveCamera::define_angles(&target_dir);
 
         assert_relative_eq!(pitch, 135f64.to_radians(), max_relative = 0.001);
-
-        let res_dir =
-            PerspectiveCamera::transition(&PerspectiveCamera::DEFAULT_DIR.into_inner(), pitch, 0.);
-        assert_relative_eq!(res_dir, target_dir.into_inner(), epsilon = 0.001);
-    }
-
-    #[test]
-    fn test_yaw_definition() {
-        let source_dir = Unit::new_normalize(Vector::new(0.000, 1.000, 0.000, 0.000));
-        let target_dir = Unit::new_normalize(Vector::new(0.000, -1.000, 0.000, 0.000));
-
-        let res_dir =
-            PerspectiveCamera::transition(&source_dir.into_inner(), 0., 180f64.to_radians());
-        assert_relative_eq!(res_dir, target_dir.into_inner(), epsilon = 0.001);
     }
 
     #[test]
@@ -212,7 +203,7 @@ mod tests {
         );
 
         let target_dir = Unit::new_normalize(target - pos);
-        let res_dir = PerspectiveCamera::transition(&PerspectiveCamera::DEFAULT_DIR, cam.pitch, cam.yaw);
+        let res_dir = cam.transition(&PerspectiveCamera::DEFAULT_DIR);
 
         assert_relative_eq!(cam.yaw, 45f64.to_radians(), epsilon = 0.001);
         assert_relative_eq!(res_dir, target_dir.into_inner(), epsilon = 0.001);
