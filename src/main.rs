@@ -11,7 +11,7 @@ use crate::renderer::objects::material::MaterialBuilder;
 use crate::renderer::objects::model::TriangleModel;
 
 fn main() {
-    let dims = Dimensions { width: 800, height: 600 };
+    let dims = Dimensions { width: 80, height: 60 };
 
     let cam = PerspectiveCamera::new(
         Vector::new(0., -10., 0., 0.),
@@ -25,8 +25,8 @@ fn main() {
             "mesh.stl",
             MaterialBuilder::default()
                 .color(Rgb::new(140, 200, 80))
-                .metallic(Rgb::new(120, 120, 120))
-                .roughness(Rgb::new(100, 100, 100))
+                .metallic(Rgb::new(200, 200, 200))
+                .roughness(Rgb::new(200, 200, 200))
                 .k(4.).build().unwrap()
         ).unwrap()
     ]));

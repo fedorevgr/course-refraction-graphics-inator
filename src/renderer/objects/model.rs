@@ -41,7 +41,7 @@ impl Triangle {
             let to_point = Vector3::from_homogeneous(point - self.points[i]).unwrap();
             area -= side.cross(&to_point).norm().abs() / 2.;
         }
-        area.abs() < f64::EPSILON
+        area.abs() <= f64::EPSILON
     }
 
     pub fn intersect(&self, ray: &Ray) -> f64 {
@@ -101,7 +101,7 @@ impl Model for TriangleModel {
         let mut min_hit: Option<Hit> = None;
 
         self.triangles.iter().for_each(|triangle| {
-            if triangle.normal.dot(&ray.direction) < 0. {
+            if -triangle.normal.dot(&ray.direction) < 0. {
                 return;
             }
 
