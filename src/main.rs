@@ -1,6 +1,6 @@
 use image::RgbImage;
 use std::thread;
-
+use std::thread::JoinHandle;
 use crate::renderer::objects::camera::{Camera, Dimensions, PerspectiveCamera};
 use crate::renderer::objects::material::{Material, Rgb};
 use crate::renderer::objects::model::TriangleModel;
@@ -50,7 +50,7 @@ struct Block<C: Camera, R: Renderer> {
     renderer: R,
 }
 
-impl<C: Camera, R: Renderer> Block<C, R> {
+impl<C: Camera + Send + 'static, R: Renderer + Send + 'static> Block<C, R> {
     pub fn new(
         size: usize,
         x: usize,
@@ -69,25 +69,27 @@ impl<C: Camera, R: Renderer> Block<C, R> {
         }
     }
 
-    pub fn run(self) -> Vec<Color> {
-        let mut x = self.x;
-        let mut y = self.y;
+    pub fn run(self) -> JoinHandle<Vec<Color>> {
+        thread::spawn(move || {
+            let mut x = self.x;
+            let mut y = self.y;
 
-        let mut buffer: Vec<Color> = vec![Color::from([0; 3]); self.size];
+            let mut buffer: Vec<Color> = vec![Color::from([0; 3]); self.size];
 
-        for i in 0..self.size {
-            let ray = self.camera.gen_ray(x, y);
-            let col = self.renderer.cast(&ray);
+            for i in 0..self.size {
+                let ray = self.camera.gen_ray(x, y);
+                let col = self.renderer.cast(&ray);
 
-            buffer[i] = Color::from([col[0], col[1], col[2]]);
+                buffer[i] = Color::from([col[0], col[1], col[2]]);
 
-            x += 1;
-            if x == self.dimensions.width {
-                x = 0;
-                y += 1;
+                x += 1;
+                if x == self.dimensions.width {
+                    x = 0;
+                    y += 1;
+                }
             }
-        }
-        buffer
+            buffer
+        })
     }
 }
 
@@ -104,15 +106,14 @@ fn generate_image<C: Camera + Clone + Send + 'static, R: Renderer + Clone + Send
 
     let threads: Vec<_> = (0..thread_count)
         .map(|i| {
-            let block = Block::new(
+            Block::new(
                 block_size,
                 block_size * i % dims.width,
                 block_size * i / dims.width,
                 dims.clone(),
                 camera.clone(),
                 renderer.clone(),
-            );
-            thread::spawn(move || block.run())
+            ).run()
         })
         .collect();
 
@@ -128,7 +129,7 @@ fn generate_image<C: Camera + Clone + Send + 'static, R: Renderer + Clone + Send
                 camera.clone(),
                 renderer.clone(),
             )
-            .run(),
+            .run().join().unwrap(),
         );
     }
 
