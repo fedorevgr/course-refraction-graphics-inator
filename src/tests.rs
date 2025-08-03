@@ -1,4 +1,4 @@
-// #![cfg(test)]
+#![cfg(test)]
 pub(crate) mod common;
 
 use crate::renderer::objects::camera::{PerspectiveCamera};
