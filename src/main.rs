@@ -1,12 +1,12 @@
-use image::RgbImage;
-use std::thread;
-use std::thread::JoinHandle;
 use crate::renderer::objects::camera::{Camera, Dimensions, PerspectiveCamera};
 use crate::renderer::objects::material::{Material, Rgb};
 use crate::renderer::objects::model::TriangleModel;
 use crate::renderer::objects::ray::Vector;
 use crate::renderer::scene::Scene;
 use crate::renderer::{Renderer, SimpleRenderer};
+use image::RgbImage;
+use std::thread;
+use std::thread::JoinHandle;
 
 mod renderer;
 mod tests;
@@ -104,7 +104,7 @@ fn generate_image<C: Camera + Clone + Send + 'static, R: Renderer + Clone + Send
     let block_size = total / thread_count;
     let leftover = total % thread_count;
 
-    let threads: Vec<_> = (0..thread_count)
+    let mut threads: Vec<_> = (0..thread_count)
         .map(|i| {
             Block::new(
                 block_size,
@@ -113,14 +113,13 @@ fn generate_image<C: Camera + Clone + Send + 'static, R: Renderer + Clone + Send
                 dims.clone(),
                 camera.clone(),
                 renderer.clone(),
-            ).run()
+            )
+            .run()
         })
         .collect();
 
-    let mut image_segments: Vec<Vec<Color>> = threads.into_iter().map(|h| h.join().unwrap()).collect();
-
     if leftover > 0 {
-        image_segments.push(
+        threads.push(
             Block::new(
                 leftover,
                 block_size * thread_count % dims.width,
@@ -129,15 +128,22 @@ fn generate_image<C: Camera + Clone + Send + 'static, R: Renderer + Clone + Send
                 camera.clone(),
                 renderer.clone(),
             )
-            .run().join().unwrap(),
+            .run(),
         );
     }
 
+    let image_segments: Vec<Vec<Color>> =
+        threads.into_iter().map(|h| h.join().unwrap()).collect();
 
     let _image: Vec<&Color> = image_segments
         .iter()
         .flat_map(|segment| segment.as_slice())
         .collect();
 
-    RgbImage::from_raw(dims.width as u32, dims.height as u32, _image.iter().flat_map(|pix| pix.0).collect()).unwrap()
+    RgbImage::from_raw(
+        dims.width as u32,
+        dims.height as u32,
+        _image.iter().flat_map(|pix| pix.0).collect(),
+    )
+    .unwrap()
 }
