@@ -13,3 +13,4 @@ nalgebra = "0.33.2"
 image = "0.25.6"
 derive_builder = "*"
 
+approx = "*"

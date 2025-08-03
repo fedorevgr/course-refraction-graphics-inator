@@ -1,5 +1,5 @@
-#![cfg(test)]
-mod common;
+// #![cfg(test)]
+pub(crate) mod common;
 
 use crate::renderer::objects::camera::{PerspectiveCamera};
 use crate::renderer::objects::ray::Vector;
