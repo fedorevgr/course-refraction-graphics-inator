@@ -1,13 +1,12 @@
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
-
-use crate::Color;
+use crate::image_manager::{Manager, OneThreaded};
 use crate::renderer::Renderer;
 use crate::renderer::objects::camera::{Camera, Dimensions};
 use crate::renderer::objects::material::{Material, MaterialBuilder, Rgb};
 use crate::renderer::objects::model::SphereModel;
 use crate::renderer::objects::ray::Vector;
-use image::RgbImage;
+
 
 pub struct Common {}
 
@@ -31,13 +30,7 @@ impl Common {
         camera: &C,
         renderer: &R,
     ) {
-        let dims = camera.get_dimensions();
-
-        RgbImage::from_fn(dims.width as u32, dims.height as u32, |x, y| {
-            let ray = camera.gen_ray(x as usize, y as usize);
-            let col = renderer.cast(&ray);
-            Color::from([col[0], col[1], col[2]])
-        })
+        OneThreaded {}.create(camera, renderer)
         .save(PathBuf::from(Self::ARTIFACT_DIR).join(path))
         .unwrap();
     }
