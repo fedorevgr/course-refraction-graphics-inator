@@ -68,6 +68,7 @@ impl Camera for FishEyeCamera {
     }
 }
 
+#[derive(Clone)]
 pub struct PerspectiveCamera {
     pos: Vector,
     pitch: f64,
