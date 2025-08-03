@@ -1,6 +1,5 @@
-/.idea
-/target
-/SandBox/target
+.idea/
+target/
 artifacts/
 Cargo.lock
 ./*.stl
