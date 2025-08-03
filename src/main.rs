@@ -36,6 +36,7 @@ fn main() {
         for i in 0..cam.get_dimensions().width {
             let ray = cam.gen_ray(i, j);
             let col = renderer.cast(&ray);
+
             image.put_pixel(i as u32, j as u32, image::Rgb::from([col[0], col[1], col[2]]));
         }
     }

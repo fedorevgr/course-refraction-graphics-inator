@@ -22,6 +22,7 @@ pub struct Triangle {
 }
 
 impl Triangle {
+    const EPSILON: f64 = 1e-9;
     pub fn new(normal: Unit, points: &[Vector3; 3]) -> Self {
         Triangle {
             normal,
@@ -41,7 +42,7 @@ impl Triangle {
             let to_point = Vector3::from_homogeneous(point - self.points[i]).unwrap();
             area -= side.cross(&to_point).norm().abs() / 2.;
         }
-        area.abs() <= f64::EPSILON
+        area.abs() <= Self::EPSILON
     }
 
     pub fn intersect(&self, ray: &Ray) -> f64 {
