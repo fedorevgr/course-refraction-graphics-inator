@@ -2,3 +2,6 @@
 /target
 /SandBox/target
 artifacts/
+Cargo.lock
+./*.stl
+./*.png

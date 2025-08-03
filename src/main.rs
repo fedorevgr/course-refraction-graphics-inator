@@ -25,7 +25,7 @@ fn main() {
     );
 
     let renderer = SimpleRenderer::new(Scene::new(vec![
-        TriangleModel::from_stl("Cup.stl", {
+        TriangleModel::from_stl("../test_data/Cup.stl", {
             let mut m = Material::metallic();
             m.roughness = Rgb::from([20, 20, 20]);
             m.k = 3.;

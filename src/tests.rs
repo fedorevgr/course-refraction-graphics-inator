@@ -43,7 +43,7 @@ fn test_simple_renderer_triangle_model() {
 
     let renderer = SimpleRenderer::new(Scene::new(vec![
         TriangleModel::from_stl(
-            "mesh.stl",
+            "../test_data/mesh.stl",
             MaterialBuilder::default()
                 .color(Rgb::new(140, 200, 80))
                 .metallic(Rgb::new(120, 120, 120))
