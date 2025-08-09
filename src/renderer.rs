@@ -4,11 +4,14 @@ pub mod color;
 
 use scene::Scene;
 
-use objects::ray::{Ray, Rgb};
+use objects::ray::{Ray, Rgb, Unit, Vector};
 use objects::model::Model;
 use objects::material::Material;
-use objects::ray::Vector;
 
+// todo: move
+fn multiply_high_byte(a: u8, b: u8) -> u8 {
+    (((a as u16) * (b as u16) ) >> 8) as u8
+}
 
 pub trait Renderer {
     fn cast(&self, ray: &Ray) -> Rgb;
@@ -33,11 +36,6 @@ impl<M: Model> SimpleRenderer<M> {
     }
 }
 
-// todo: move
-fn multiply_high_byte(a: u8, b: u8) -> u8 {
-    (((a as u16) * (b as u16) ) >> 8) as u8
-}
-
 impl<M: Model> Renderer for SimpleRenderer<M> {
     fn cast(&self, ray: &Ray) -> Rgb {
         match self.scene.intersect(ray) {
@@ -59,5 +57,38 @@ impl<M: Model> Renderer for SimpleRenderer<M> {
                 color_res
             }
         }
+    }
+}
+
+pub trait Environment {
+    fn evaluate(&self, ray: &Ray) -> Rgb;
+}
+
+#[derive(Debug, Clone)]
+pub struct DiffuseRenderer<M: Model, E: Environment>  {
+    scene: Scene<M>,
+    environment: E
+}
+
+impl<M: Model, E: Environment> DiffuseRenderer<M, E> {
+    pub fn new(scene: Scene<M>, environment: E) -> Self {
+        Self {
+            scene,
+            environment
+        }
+    }
+
+    fn diffused_dir(original: &Unit, norm: &Unit) -> Unit {
+        todo!()
+    }
+
+    fn reflected_ray(original: &Unit, norm: &Unit) -> Unit {
+        Unit::new_unchecked(original.into_inner() + norm.scale(norm.dot(original)))
+    }
+}
+
+impl<M: Model, E: Environment> Renderer for DiffuseRenderer<M, E> {
+    fn cast(&self, ray: &Ray) -> Rgb {
+        todo!()
     }
 }

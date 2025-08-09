@@ -1,3 +1,5 @@
+mod renderer;
+
 use crate::renderer::objects::camera::{Dimensions, PerspectiveCamera};
 use crate::renderer::objects::material::{Material, Rgb};
 use crate::renderer::objects::model::TriangleModel;
@@ -6,7 +8,6 @@ use crate::renderer::scene::Scene;
 use crate::renderer::SimpleRenderer;
 use crate::image_manager::Manager;
 
-mod renderer;
 mod tests;
 mod image_manager;
 
