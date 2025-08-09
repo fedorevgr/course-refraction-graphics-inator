@@ -5,6 +5,8 @@ use crate::renderer::Renderer;
 use crate::renderer::objects::camera::{Camera, Dimensions};
 
 use image::RgbImage;
+use indicatif::{MultiProgress, ProgressBar};
+
 type Color = image::Rgb<u8>;
 
 pub trait Manager<C: Camera, R: Renderer> {
@@ -57,6 +59,7 @@ impl<C: Camera + Send + 'static, R: Renderer + Send + 'static> Block<C, R> {
         dimensions: Dimensions,
         camera: C,
         renderer: R,
+
     ) -> Self {
         Self {
             size,
@@ -64,11 +67,11 @@ impl<C: Camera + Send + 'static, R: Renderer + Send + 'static> Block<C, R> {
             y,
             dimensions,
             camera,
-            renderer,
+            renderer
         }
     }
 
-    pub fn run(self) -> JoinHandle<Vec<Color>> {
+    pub fn run(self, pb: ProgressBar) -> JoinHandle<Vec<Color>> {
         thread::spawn(move || {
             let mut x = self.x;
             let mut y = self.y;
@@ -76,6 +79,8 @@ impl<C: Camera + Send + 'static, R: Renderer + Send + 'static> Block<C, R> {
             let mut buffer: Vec<Color> = vec![Color::from([0; 3]); self.size];
 
             for i in 0..self.size {
+                pb.tick();
+
                 let ray = self.camera.gen_ray(x, y);
                 let col = self.renderer.cast(&ray);
 
@@ -93,15 +98,23 @@ impl<C: Camera + Send + 'static, R: Renderer + Send + 'static> Block<C, R> {
 }
 
 pub struct MultiThread {
-    pub thread_count: usize,
+    pub thread_count: usize
 }
 
 impl MultiThread {
+    pub fn new(thread_count: usize, show_status: bool) -> Self {
+        Self {
+            thread_count
+        }
+    }
+
     fn generate_image<C: Camera + Clone + Send + 'static, R: Renderer + Clone + Send + 'static>(
         &self,
         camera: &C,
         renderer: &R,
     ) -> RgbImage {
+        let progress_bar = MultiProgress::new();
+
         let dims = camera.get_dimensions();
         let total = dims.width * dims.height;
 
@@ -110,6 +123,7 @@ impl MultiThread {
 
         let mut threads: Vec<_> = (0..self.thread_count)
             .map(|i| {
+                let pb = progress_bar.add(ProgressBar::new(block_size as u64));
                 Block::new(
                     block_size,
                     block_size * i % dims.width,
@@ -118,11 +132,12 @@ impl MultiThread {
                     camera.clone(),
                     renderer.clone(),
                 )
-                .run()
+                .run(pb)
             })
             .collect();
 
         if leftover > 0 {
+            let pb = progress_bar.add(ProgressBar::new(leftover as u64));
             threads.push(
                 Block::new(
                     leftover,
@@ -132,7 +147,7 @@ impl MultiThread {
                     camera.clone(),
                     renderer.clone(),
                 )
-                .run(),
+                .run(pb),
             );
         }
 

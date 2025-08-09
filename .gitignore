@@ -4,3 +4,4 @@ artifacts/
 Cargo.lock
 ./*.stl
 ./*.png
+.DS_Store
