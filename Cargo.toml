@@ -10,6 +10,7 @@ stl_io = "0.8.5"
 nalgebra = "0.33.2"
 image = "0.25.6"
 derive_builder = "*"
+rayon = "*"
 
 # Tests
 approx = "*"
