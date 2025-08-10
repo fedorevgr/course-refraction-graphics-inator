@@ -4,9 +4,9 @@ pub(crate) mod common;
 use crate::renderer::objects::camera::{PerspectiveCamera};
 use crate::renderer::objects::ray::Vector;
 use crate::renderer::objects::material::Rgb;
-use crate::renderer::objects::model::TriangleModel;
+use crate::renderer::objects::model::triangle::TriangleModel;
 use crate::renderer::scene::Scene;
-use crate::renderer::SimpleRenderer;
+use crate::renderer::implementations::simple_illumination::SimpleIllumination;
 use crate::renderer::objects::material::MaterialBuilder;
 
 use common::Common;
@@ -24,7 +24,7 @@ fn test_simple_renderer_sphere_model() {
         std::f64::consts::FRAC_PI_6
     );
 
-    let renderer = SimpleRenderer::new(Scene::new(Common::get_3_spheres()));
+    let renderer = SimpleIllumination::new(Scene::new(Common::get_3_spheres()));
 
     Common::generate_image("sphere_model.png", &cam, &renderer);
 }
@@ -41,7 +41,7 @@ fn test_simple_renderer_triangle_model() {
         std::f64::consts::FRAC_PI_6,
     );
 
-    let renderer = SimpleRenderer::new(Scene::new(vec![
+    let renderer = SimpleIllumination::new(Scene::new(vec![
         TriangleModel::from_stl(
             "../test_data/mesh.stl",
             MaterialBuilder::default()
@@ -67,7 +67,7 @@ fn test_simple_renderer_cam_reposition() {
         std::f64::consts::FRAC_PI_6
     );
 
-    let renderer = SimpleRenderer::new(Scene::new(Common::get_3_spheres()));
+    let renderer = SimpleIllumination::new(Scene::new(Common::get_3_spheres()));
 
     Common::generate_image("cam_reposition.png", &cam, &renderer);
 }

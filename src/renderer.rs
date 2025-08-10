@@ -1,94 +1,9 @@
 pub mod scene;
 pub mod objects;
-pub mod color;
+pub mod implementations;
 
-use scene::Scene;
-
-use objects::ray::{Ray, Rgb, Unit, Vector};
-use objects::model::Model;
-use objects::material::Material;
-
-// todo: move
-fn multiply_high_byte(a: u8, b: u8) -> u8 {
-    (((a as u16) * (b as u16) ) >> 8) as u8
-}
+use objects::ray::{Ray, Rgb};
 
 pub trait Renderer {
     fn cast(&self, ray: &Ray) -> Rgb;
-}
-
-#[derive(Clone, Debug)]
-pub struct SimpleRenderer<M: Model> {
-    scene: Scene<M>,
-    background: Material,
-    light: Vector,
-    light_color: Rgb
-}
-
-impl<M: Model> SimpleRenderer<M> {    
-    pub fn new(scene: Scene<M>) -> SimpleRenderer<M> {
-        SimpleRenderer {
-            scene,
-            background: Material::default(),
-            light: Vector::new(10., -10., 10., 0.),
-            light_color: Rgb::new(255, 255, 255)
-        }
-    }
-}
-
-impl<M: Model> Renderer for SimpleRenderer<M> {
-    fn cast(&self, ray: &Ray) -> Rgb {
-        match self.scene.intersect(ray) {
-            None => { self.background.color },
-            Some(hit) => {
-                let cos_reflection = ((self.light - hit.pos).normalize().dot(&hit.normal).max(0.).powf(hit.material.k) * 255.) as u8;
-
-                let cos_diffusive = (ray.direction.dot(&-hit.normal).max(0.) * 255.) as u8;
-
-                let mut color_res = Rgb::zeros();
-
-                for i in 0..3 {
-
-                    let reflection_intensity = multiply_high_byte(multiply_high_byte(self.light_color[i], hit.material.metallic[i]), cos_reflection);
-                    let diffusion_intensity = multiply_high_byte(multiply_high_byte(hit.material.color[i], hit.material.roughness[i]), cos_diffusive);
-                    color_res[i] = diffusion_intensity.saturating_add(reflection_intensity);
-                };
-
-                color_res
-            }
-        }
-    }
-}
-
-pub trait Environment {
-    fn evaluate(&self, ray: &Ray) -> Rgb;
-}
-
-#[derive(Debug, Clone)]
-pub struct DiffuseRenderer<M: Model, E: Environment>  {
-    scene: Scene<M>,
-    environment: E
-}
-
-impl<M: Model, E: Environment> DiffuseRenderer<M, E> {
-    pub fn new(scene: Scene<M>, environment: E) -> Self {
-        Self {
-            scene,
-            environment
-        }
-    }
-
-    fn diffused_dir(original: &Unit, norm: &Unit) -> Unit {
-        todo!()
-    }
-
-    fn reflected_ray(original: &Unit, norm: &Unit) -> Unit {
-        Unit::new_unchecked(original.into_inner() + norm.scale(norm.dot(original)))
-    }
-}
-
-impl<M: Model, E: Environment> Renderer for DiffuseRenderer<M, E> {
-    fn cast(&self, ray: &Ray) -> Rgb {
-        todo!()
-    }
 }

@@ -23,7 +23,6 @@ pub struct FishEyeCamera {
     pub dimensions: Dimensions,
 }
 
-// todo: forgot what it does
 impl FishEyeCamera {
     pub fn new(pos: Vector, yaw: f64, pitch: f64, fov: f64, dims: Dimensions) -> Self {
         FishEyeCamera {

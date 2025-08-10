@@ -1,10 +1,14 @@
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
-use crate::image_manager::{Manager, OneThreaded};
+
+use crate::image_manager::Manager;
+use crate::image_manager::implementations::one_thread::OneThreaded;
+
 use crate::renderer::Renderer;
+
 use crate::renderer::objects::camera::{Camera, Dimensions};
 use crate::renderer::objects::material::{Material, MaterialBuilder, Rgb};
-use crate::renderer::objects::model::SphereModel;
+use crate::renderer::objects::model::sphere::SphereModel;
 use crate::renderer::objects::ray::Vector;
 
 
