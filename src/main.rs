@@ -19,14 +19,14 @@ fn main() {
         Vector::new(7.2, -4.2, 6.4, 0.),
         Vector::new(0., 0., 0., 0.),
         Dimensions {
-            width: 400,
-            height: 300,
+            width: 1920,
+            height: 1080,
         },
         std::f64::consts::FRAC_PI_6,
     );
 
     let renderer = SimpleRenderer::new(Scene::new(vec![
-        TriangleModel::from_stl("test_data/Cup.stl", {
+        TriangleModel::from_stl("test_data/Cube.stl", {
             let mut m = Material::metallic();
             m.roughness = Rgb::from([20, 20, 20]);
             m.k = 3.;
@@ -35,28 +35,9 @@ fn main() {
         .unwrap(),
     ]));
 
-    // let i_man = image_manager::MultiThread { thread_count: 40};
-    // i_man.create(&camera, &renderer)
-    //     .save("artifacts/Cup.png")
-    //     .unwrap();
 
-    let manager = image_manager::Library::new(128);
-
-    let start = std::time::SystemTime::now();
-    manager.create(&camera, &renderer);
-    println!("Rayon: {:?}", start.elapsed().unwrap());
-
-    let manager = image_manager::MultiThread { thread_count: 40};
-
-    let start = std::time::SystemTime::now();
-    manager.create(&camera, &renderer);
-    println!("Multi Thread 40: {:?}", start.elapsed().unwrap());
-
-    let manager = image_manager::MultiThread { thread_count: 80};
-
-    let start = std::time::SystemTime::now();
-    manager.create(&camera, &renderer);
-    println!("Multi Thread 80: {:?}", start.elapsed().unwrap());
+    let manager = image_manager::Library::new(64 * 64);
+    manager.create(&camera, &renderer).save("artifacts/Cube.png").unwrap();
 }
 
 
