@@ -1,7 +1,7 @@
 #![cfg(test)]
 pub(crate) mod common;
 
-use crate::renderer::objects::camera::{PerspectiveCamera};
+use crate::renderer::objects::camera::perspective::PerspectiveCamera;
 use crate::renderer::objects::ray::Vector;
 use crate::renderer::objects::material::Rgb;
 use crate::renderer::objects::model::triangle::TriangleModel;

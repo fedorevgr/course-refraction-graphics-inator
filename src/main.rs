@@ -2,7 +2,8 @@ mod renderer;
 mod tests;
 mod image_manager;
 
-use crate::renderer::objects::camera::{Dimensions, PerspectiveCamera};
+use crate::renderer::objects::camera::Dimensions;
+use crate::renderer::objects::camera::perspective::PerspectiveCamera;
 use crate::renderer::objects::material::{Material, Rgb};
 use crate::renderer::objects::model::triangle::TriangleModel;
 use crate::renderer::objects::ray::Vector;
