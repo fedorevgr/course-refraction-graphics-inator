@@ -12,7 +12,10 @@ image = "0.25.6"
 derive_builder = "*"
 rayon = "*"
 rand = "0.9.1"
+
 rand_chacha = "0.9"
+rand_xoshiro = "0.7.0"
+rand_pcg = "0.9.0"
 
 # Tests
 approx = "*"

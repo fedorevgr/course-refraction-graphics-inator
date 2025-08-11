@@ -11,10 +11,6 @@ pub struct Library {
     size: usize,
 }
 impl Library {
-    pub fn new(size: usize) -> Library {
-        Library { size }
-    }
-
     fn generate_image<C: Camera + Clone + Send + 'static + Sync, R: Renderer + Clone + Send + 'static + Sync>(
         &self,
         camera: &C,

@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use crate::renderer::objects::hit::Hit;
 use crate::renderer::objects::material::Material;
 use crate::renderer::objects::model::Model;
@@ -30,6 +31,10 @@ impl Model for SphereModel {
             None
         } else {
             let t = (-b - d.sqrt()) / 2.;
+            if t < 0. {
+                return None;
+            }
+
             let hit_pos = ray.origin + ray.direction.scale(t);
             Some(Hit::new(
                 t,

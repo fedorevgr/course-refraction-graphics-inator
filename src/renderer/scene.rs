@@ -20,7 +20,7 @@ impl<M: Model> Scene<M> {
             match object.hit(ray) {
                 None => {}
                 Some(hit) => {
-                    if hit.factor < closest_t {
+                    if 0.0000001 < hit.factor && hit.factor < closest_t {
                         closest_t = hit.factor;
                         closest = Some(hit);
                     }
