@@ -3,7 +3,7 @@
 pub mod fisheye;
 pub mod perspective;
 
-use crate::renderer::objects::ray::{Matrix, Ray, Unit, Vector, Vector3};
+use crate::renderer::objects::ray::Ray;
 
 pub trait Camera {
     fn gen_ray(&self, u: usize, v: usize) -> Ray;

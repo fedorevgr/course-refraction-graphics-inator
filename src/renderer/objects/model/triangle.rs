@@ -1,6 +1,9 @@
+#![allow(dead_code)]
+
 use std::error::Error;
 use std::fs::OpenOptions;
 use std::path::Path;
+
 use crate::renderer::objects::hit::Hit;
 use crate::renderer::objects::material::Material;
 use crate::renderer::objects::model::Model;

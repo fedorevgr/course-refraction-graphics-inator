@@ -11,6 +11,8 @@ nalgebra = "0.33.2"
 image = "0.25.6"
 derive_builder = "*"
 rayon = "*"
+rand = "0.9.1"
+rand_chacha = "0.9"
 
 # Tests
 approx = "*"

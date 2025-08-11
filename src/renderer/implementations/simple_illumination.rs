@@ -1,13 +1,11 @@
+#![allow(dead_code)]
+
 use crate::renderer::objects::material::{Material, Rgb};
 use crate::renderer::objects::model::Model;
-use crate::renderer::objects::ray::{Ray, Vector};
+use crate::renderer::objects::ray::{Ray, Vector, multiply_high_byte};
 use crate::renderer::{Renderer};
 use crate::renderer::scene::Scene;
 
-#[inline]
-fn multiply_high_byte(a: u8, b: u8) -> u8 {
-    (((a as u16) * (b as u16) ) >> 8) as u8
-}
 
 #[derive(Clone, Debug)]
 pub struct SimpleIllumination<M: Model> {
