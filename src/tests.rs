@@ -10,7 +10,7 @@ use crate::renderer::implementations::simple_illumination::SimpleIllumination;
 use crate::renderer::objects::material::MaterialBuilder;
 
 use common::Common;
-
+use crate::renderer::implementations::sampling::Sampling;
 
 #[test]
 fn test_simple_renderer_sphere_model() {
@@ -24,7 +24,7 @@ fn test_simple_renderer_sphere_model() {
         std::f64::consts::FRAC_PI_6
     );
 
-    let renderer = SimpleIllumination::new(Scene::new(Common::get_3_spheres()));
+    let renderer = Sampling::new(Scene::new(Common::get_3_spheres()));
 
     Common::generate_image("sphere_model.png", &cam, &renderer);
 }
@@ -41,7 +41,7 @@ fn test_simple_renderer_triangle_model() {
         std::f64::consts::FRAC_PI_6,
     );
 
-    let renderer = SimpleIllumination::new(Scene::new(vec![
+    let renderer = Sampling::new(Scene::new(vec![
         TriangleModel::from_stl(
             "../test_data/mesh.stl",
             MaterialBuilder::default()

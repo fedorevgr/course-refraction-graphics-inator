@@ -23,6 +23,15 @@ pub fn multiply_rgb(a: &Rgb, b: &Rgb) -> Rgb {
         multiply_high_byte(a.z, b.z)
     )
 }
+
+pub fn scale_rgb(a: &Rgb, b: u8) -> Rgb {
+    Rgb::new(
+        multiply_high_byte(a.x, b),
+        multiply_high_byte(a.y, b),
+        multiply_high_byte(a.z, b)
+    )
+}
+
 pub fn saturating_add(a: &Rgb, b: &Rgb) -> Rgb {
     Rgb::new(
         a.x.saturating_add(b.x),
