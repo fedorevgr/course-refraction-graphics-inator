@@ -21,5 +21,7 @@ approx = "*"
 indicatif = "*"
 
 # GUI
-#egui = "0.31"
-#eframe = "0.31"
+egui = "0.31"
+eframe = "0.31"
+
+clap = { version = "4.5.41", features = ["derive"] }
