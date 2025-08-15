@@ -2,6 +2,7 @@ use image::RgbImage;
 use crate::image_manager::{Color, Manager};
 use crate::renderer::objects::camera::Camera;
 use crate::renderer::Renderer;
+use crate::renderer::objects::ray::Rgb as RayRgb;
 
 pub struct OneThreaded {
 }
@@ -17,7 +18,7 @@ impl OneThreaded {
         RgbImage::from_fn(dims.width as u32, dims.height as u32, |x, y| {
             let ray = camera.gen_ray(x as usize, y as usize);
             let col = renderer.cast(&ray);
-            Color::from([col[0], col[1], col[2]])
+            RayRgb(col).to_pixel().into()
         })
     }
 }

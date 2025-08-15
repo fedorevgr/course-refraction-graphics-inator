@@ -4,22 +4,22 @@ use std::cell::RefCell;
 use nalgebra::Vector4;
 use crate::renderer::Renderer;
 use crate::renderer::objects::hit::Hit;
-use crate::renderer::objects::material::Rgb;
+use crate::renderer::objects::material::RgbIntensity;
 use crate::renderer::objects::model::Model;
-use crate::renderer::objects::ray::{Ray, Unit, Unit3, Vector3, multiply_rgb, saturating_add, Vector, scale_rgb};
+use crate::renderer::objects::ray::{Ray, Unit, Unit3, Vector3, Vector};
 use crate::renderer::scene::Scene;
 use rand::prelude::Rng;
 
 pub trait Environment {
-    fn evaluate(&self, ray: &Ray) -> Rgb;
+    fn evaluate(&self, ray: &Ray) -> RgbIntensity;
 }
 
 #[derive(Clone)]
 pub struct Black {}
 
 impl Environment for Black {
-    fn evaluate(&self, ray: &Ray) -> Rgb {
-        [0x30; 3].into()
+    fn evaluate(&self, ray: &Ray) -> RgbIntensity {
+        [0.2; 3].into()
     }
 }
 
@@ -73,7 +73,7 @@ impl<M: Model, E: Environment, R: Rng + Clone> Sampling<M, E, R> {
     }
 
     fn define_new_ray(&self, original: &Ray, hit: &Hit) -> Ray {
-        let specular = self.rng.borrow_mut().random::<u8>();
+        let specular = self.rng.borrow_mut().random::<f32>();
 
         Ray {
             direction: if specular <= hit.material.metallic.x {
@@ -81,24 +81,25 @@ impl<M: Model, E: Environment, R: Rng + Clone> Sampling<M, E, R> {
             } else {
                 self.diffused_dir(&hit.normal)
             },
-            origin: hit.pos
+            origin: hit.pos,
+            env: 1.
         }
     }
-    fn cast_once(&self, ray: &Ray) -> Rgb {
+    fn cast_once(&self, ray: &Ray) -> RgbIntensity {
         let mut current_ray = ray.clone();
 
-        let mut color = Rgb::new(0xFF, 0xFF, 0xFF);
-        let mut emission_collected = Rgb::new(0, 0, 0);
+        let mut color = RgbIntensity::from([1.; 3]);
+        let mut emission_collected = RgbIntensity::from([0.; 3]);
 
         for _ in 0..self.bounce_limit {
             if let Some(hit) = self.scene.intersect(&current_ray) {
                 current_ray = self.define_new_ray(&mut current_ray, &hit);
 
                 let emitted = &hit.material.emissivity;
-                emission_collected = saturating_add(&emission_collected, &multiply_rgb(&emitted, &color));
-                color = multiply_rgb(&hit.material.color, &color);
+                emission_collected = emission_collected + emitted.component_mul(&color);
+                color = hit.material.color.component_mul(&color);
             } else {
-                emission_collected = saturating_add(&multiply_rgb(&self.environment.evaluate(&current_ray), &color), &emission_collected);
+                emission_collected = self.environment.evaluate(&current_ray).component_mul(&color) + emission_collected;
                 break;
             }
         }
@@ -108,13 +109,8 @@ impl<M: Model, E: Environment, R: Rng + Clone> Sampling<M, E, R> {
 }
 
 impl<M: Model, E: Environment, R: Rng + Clone> Renderer for Sampling<M, E, R> {
-    fn cast(&self, ray: &Ray) -> Rgb {
-
-        let mut rgb = nalgebra::Vector3::<usize>::zeros();
-        for _ in 0..self.samples {
-            rgb += self.cast_once(ray).map(|v| v as usize);
-        }
-        Rgb::new((rgb.x / self.samples) as u8, (rgb.y / self.samples) as u8, (rgb.z / self.samples) as u8)
+    fn cast(&self, ray: &Ray) -> RgbIntensity {
+        (0..self.samples).map(|_| self.cast_once(ray)).sum()
     }
 }
 

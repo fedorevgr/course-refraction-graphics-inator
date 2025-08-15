@@ -1,28 +1,28 @@
 #![allow(dead_code)]
 
 use crate::renderer::objects::hit::Hit;
-use crate::renderer::objects::material::Rgb;
+use crate::renderer::objects::material::RgbIntensity;
 use crate::renderer::objects::model::Model;
-use crate::renderer::objects::ray::{Ray, Vector};
+use crate::renderer::objects::ray::{Ray, Rgb, Vector};
 use crate::renderer::Renderer;
 use crate::renderer::scene::Scene;
 
 struct PointLight {
-    color: Rgb,
+    color: RgbIntensity,
     intensity: f32,
 }
 
 pub trait Ambient {
-    fn evaluate(&self, ray: &Ray) -> Rgb;
+    fn evaluate(&self, ray: &Ray) -> RgbIntensity;
 }
 
 pub struct WithSky {}
 impl Ambient for WithSky {
-    fn evaluate(&self, ray: &Ray) -> Rgb {
+    fn evaluate(&self, ray: &Ray) -> RgbIntensity {
         if ray.direction.z < 0.0 {
-            Rgb::zeros()
+            RgbIntensity::zeros()
         } else {
-            Rgb::new(0, 0, 255)
+            RgbIntensity::new(0.0, 0.0, 1.0)
         }
     }
 }
@@ -47,19 +47,19 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
         todo!()
     }
 
-    fn _specular(&self, ray: &Ray, hit: &Hit) -> Rgb {
+    fn _specular(&self, ray: &Ray, hit: &Hit) -> RgbIntensity {
         todo!()
     }
 
-    fn _diffusive(&self, ray: &Ray, hit: &Hit) -> Rgb {
+    fn _diffusive(&self, ray: &Ray, hit: &Hit) -> RgbIntensity {
         todo!()
     }
 
-    fn _ambient(&self, ray: &Ray, hit: &Hit) -> Rgb {
+    fn _ambient(&self, ray: &Ray, hit: &Hit) -> RgbIntensity {
         self.ambient.evaluate(&ray)
     }
 
-    fn _cast(&self, ray: &Ray, depth: usize) -> Rgb {
+    fn _cast(&self, ray: &Ray, depth: usize) -> RgbIntensity {
 
         let hit = self.scene.intersect(ray);
 
@@ -76,14 +76,14 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
             intensity
         }
         else {
-            Rgb::zeros()
+            RgbIntensity::zeros()
         }
 
     }
 }
 
 impl<M: Model, A: Ambient> Renderer for GlobalIllumination<M, A> {
-    fn cast(&self, ray: &Ray) -> Rgb {
+    fn cast(&self, ray: &Ray) -> RgbIntensity {
         self._cast(ray, 0)
     }
 }

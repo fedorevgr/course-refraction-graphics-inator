@@ -1,24 +1,24 @@
 #![allow(dead_code)]
 
-pub use crate::renderer::objects::ray::{Rgb};
+pub use crate::renderer::objects::ray::{RgbIntensity};
 use derive_builder::Builder;
 
 #[derive(Debug, Clone, Builder)]
 pub struct Material {
-    #[builder(default = Rgb::from([0xC0; 3]))]
-    pub color: Rgb,
+    #[builder(default = RgbIntensity::from([0.; 3]))]
+    pub color: RgbIntensity,
 
-    #[builder(default = Rgb::from([0x0; 3]))]
-    pub emissivity: Rgb,
+    #[builder(default = RgbIntensity::from([0.; 3]))]
+    pub emissivity: RgbIntensity,
 
-    #[builder(default = Rgb::from([0x10; 3]))]
-    pub metallic: Rgb,
+    #[builder(default = RgbIntensity::from([0.; 3]))]
+    pub metallic: RgbIntensity,
 
-    #[builder(default = Rgb::from([0xC0; 3]))]
-    pub roughness: Rgb,
+    #[builder(default = RgbIntensity::from([0.; 3]))]
+    pub roughness: RgbIntensity,
 
-    #[builder(default = Rgb::from([0x0; 3]))]
-    pub transmittance: Rgb,
+    #[builder(default = RgbIntensity::from([0.; 3]))]
+    pub transmittance: RgbIntensity,
 
     #[builder(default = 0.0)]
     pub k: f64
@@ -27,22 +27,22 @@ pub struct Material {
 impl Material {
     pub fn metallic() -> Self {
         Material {
-            color: Rgb::from([0x80, 0x80, 0xC0]),
-            emissivity: Rgb::from([0; 3]),
-            metallic: Rgb::from([0xFF; 3]),
-            roughness: Rgb::from([0x30; 3]),
-            transmittance: Rgb::from([0; 3]),
+            color: RgbIntensity::from([0.5, 0.5, 0.7]),
+            emissivity: RgbIntensity::from([0.; 3]),
+            metallic: RgbIntensity::from([1.; 3]),
+            roughness: RgbIntensity::from([0.2; 3]),
+            transmittance: RgbIntensity::from([0.; 3]),
             k: 30.
         }
     }
 
     pub fn marble() -> Self {
         Material {
-            color: Rgb::from([0xA0; 3]),
-            emissivity: Rgb::from([0; 3]),
-            metallic: Rgb::from([0; 3]),
-            roughness: Rgb::from([0xCF; 3]),
-            transmittance: Rgb::from([0; 3]),
+            color: RgbIntensity::from([0.8; 3]),
+            emissivity: RgbIntensity::from([0.; 3]),
+            metallic: RgbIntensity::from([0.; 3]),
+            roughness: RgbIntensity::from([0.7; 3]),
+            transmittance: RgbIntensity::from([0.; 3]),
             k: 2.
         }
     }
@@ -51,11 +51,11 @@ impl Material {
 impl Default for Material {
     fn default() -> Self {
         Material{
-            color: Rgb::from([0; 3]),
-            emissivity: Rgb::from([0; 3]),
-            metallic: Rgb::from([0xFF; 3]),
-            roughness: Rgb::from([0xFF; 3]),
-            transmittance: Rgb::from([0; 3]),
+            color: RgbIntensity::from([1.; 3]),
+            emissivity: RgbIntensity::from([0.; 3]),
+            metallic: RgbIntensity::from([0.3; 3]),
+            roughness: RgbIntensity::from([0.2; 3]),
+            transmittance: RgbIntensity::from([0.; 3]),
             k: 0.
         }
     }

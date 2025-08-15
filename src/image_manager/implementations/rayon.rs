@@ -1,12 +1,13 @@
 #![allow(dead_code)]
 
-use image::RgbImage;
+use image::{RgbImage, Rgb};
 
 use rayon::iter::IntoParallelRefIterator;
 use rayon::prelude::*;
 
 use crate::image_manager::{Color, Manager};
 use crate::renderer::objects::camera::Camera;
+use crate::renderer::objects::ray::Rgb as RayRgb;
 use crate::renderer::Renderer;
 
 pub struct Library {
@@ -43,7 +44,7 @@ impl Library {
                 let ray = camera.gen_ray(x, y);
                 let col = renderer.cast(&ray);
 
-                buffer[i] = Color::from([col[0], col[1], col[2]]);
+                buffer[i] = RayRgb(col).to_pixel().into();
 
                 x += 1;
                 if x == _width {

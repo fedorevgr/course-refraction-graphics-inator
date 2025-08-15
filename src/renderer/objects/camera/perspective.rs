@@ -70,7 +70,7 @@ impl Camera for PerspectiveCamera {
         let uv = self.project(u, v);
         let projected = self.transition(&uv);
 
-        Ray::new(self.pos, Unit::new_normalize(projected))
+        Ray::new(self.pos, Unit::new_normalize(projected), 1.)
     }
 
     fn get_dimensions(&self) -> &Dimensions {

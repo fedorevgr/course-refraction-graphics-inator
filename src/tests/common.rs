@@ -7,7 +7,7 @@ use crate::image_manager::implementations::one_thread::OneThreaded;
 use crate::renderer::Renderer;
 
 use crate::renderer::objects::camera::{Camera, Dimensions};
-use crate::renderer::objects::material::{Material, MaterialBuilder, Rgb};
+use crate::renderer::objects::material::{Material, MaterialBuilder, RgbIntensity};
 use crate::renderer::objects::model::sphere::SphereModel;
 use crate::renderer::objects::ray::Vector;
 
@@ -47,9 +47,9 @@ impl Common {
                 Vector::new(-1.3, 2., 0., 0.),
                 1.5,
                 MaterialBuilder::default()
-                    .color(Rgb::new(140, 200, 80))
-                    .metallic(Rgb::new(120, 120, 120))
-                    .roughness(Rgb::new(100, 100, 100))
+                    .color(RgbIntensity::new(0.6, 0.8, 0.4))
+                    .metallic([0.4; 3].into())
+                    .roughness([0.3; 3].into())
                     .k(4.)
                     .build()
                     .unwrap(),

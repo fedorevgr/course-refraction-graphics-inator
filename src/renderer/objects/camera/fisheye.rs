@@ -41,6 +41,7 @@ impl FishEyeCamera {
         Some(Ray::new(
             self.pos,
             Unit::new_normalize(matrix_pitch * (matrix_yaw * Vector::new(0., 0., -1., 0.))),
+            1.
         ))
     }
 }

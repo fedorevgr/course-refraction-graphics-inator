@@ -5,6 +5,8 @@ use crate::image_manager::{Color, Manager};
 use crate::renderer::objects::camera::{Camera, Dimensions};
 use crate::renderer::Renderer;
 
+use crate::renderer::objects::ray::Rgb as RayRgb;
+
 struct Block<C: Camera, R: Renderer> {
     size: usize,
     x: usize,
@@ -45,7 +47,7 @@ impl<C: Camera + Send + 'static, R: Renderer + Send + 'static> Block<C, R> {
                 let ray = self.camera.gen_ray(x, y);
                 let col = self.renderer.cast(&ray);
 
-                buffer[i] = Color::from([col[0], col[1], col[2]]);
+                buffer[i] = RayRgb(col).to_pixel().into();
 
                 x += 1;
                 if x == self.dimensions.width {

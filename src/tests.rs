@@ -3,8 +3,8 @@ pub(crate) mod common;
 
 use rand::SeedableRng;
 use crate::renderer::objects::camera::perspective::PerspectiveCamera;
-use crate::renderer::objects::ray::Vector;
-use crate::renderer::objects::material::Rgb;
+use crate::renderer::objects::ray::{Rgb, Vector};
+use crate::renderer::objects::material::RgbIntensity;
 use crate::renderer::objects::model::triangle::TriangleModel;
 use crate::renderer::scene::Scene;
 use crate::renderer::implementations::simple_illumination::SimpleIllumination;
@@ -46,9 +46,9 @@ fn test_simple_renderer_triangle_model() {
         TriangleModel::from_stl(
             "../test_data/mesh.stl",
             MaterialBuilder::default()
-                .color(Rgb::new(140, 200, 80))
-                .metallic(Rgb::new(120, 120, 120))
-                .roughness(Rgb::new(200, 200, 200))
+                .color(Rgb::from_pixel([140, 200, 80]))
+                .metallic(Rgb::from_pixel([120, 120, 120]))
+                .roughness(Rgb::from_pixel([200, 200, 200]))
                 .k(4.).build().unwrap()
         ).unwrap()
     ]), Black{}, 3, rand_pcg::Pcg64Mcg::seed_from_u64(0));
