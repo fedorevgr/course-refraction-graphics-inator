@@ -1,6 +1,7 @@
 #![cfg(test)]
 pub(crate) mod common;
 
+use rand::SeedableRng;
 use crate::renderer::objects::camera::perspective::PerspectiveCamera;
 use crate::renderer::objects::ray::Vector;
 use crate::renderer::objects::material::Rgb;
@@ -10,7 +11,7 @@ use crate::renderer::implementations::simple_illumination::SimpleIllumination;
 use crate::renderer::objects::material::MaterialBuilder;
 
 use common::Common;
-use crate::renderer::implementations::sampling::Sampling;
+use crate::renderer::implementations::sampling::{Black, Sampling};
 
 #[test]
 fn test_simple_renderer_sphere_model() {
@@ -24,7 +25,7 @@ fn test_simple_renderer_sphere_model() {
         std::f64::consts::FRAC_PI_6
     );
 
-    let renderer = Sampling::new(Scene::new(Common::get_3_spheres()));
+    let renderer = Sampling::new(Scene::new(Common::get_3_spheres()), Black{}, 3, rand_pcg::Pcg64Mcg::seed_from_u64(0));
 
     Common::generate_image("sphere_model.png", &cam, &renderer);
 }
@@ -50,7 +51,7 @@ fn test_simple_renderer_triangle_model() {
                 .roughness(Rgb::new(200, 200, 200))
                 .k(4.).build().unwrap()
         ).unwrap()
-    ]));
+    ]), Black{}, 3, rand_pcg::Pcg64Mcg::seed_from_u64(0));
 
     Common::generate_image("triangle_model.png", &cam, &renderer);
 }
