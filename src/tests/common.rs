@@ -1,8 +1,8 @@
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 
-use crate::image_manager::Manager;
-use crate::image_manager::implementations::one_thread::OneThreaded;
+use crate::image_generator::ImageGenerator;
+use crate::image_generator::implementations::one_thread::OneThreaded;
 
 use crate::renderer::Renderer;
 

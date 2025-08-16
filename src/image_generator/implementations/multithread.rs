@@ -1,7 +1,7 @@
 use std::thread;
 use std::thread::JoinHandle;
 use image::RgbImage;
-use crate::image_manager::{Color, Manager};
+use crate::image_generator::{Color, ImageGenerator};
 use crate::renderer::objects::camera::{Camera, Dimensions};
 use crate::renderer::Renderer;
 
@@ -122,7 +122,7 @@ impl MultiThread {
     }
 }
 
-impl<C, R> Manager<C, R> for MultiThread
+impl<C, R> ImageGenerator<C, R> for MultiThread
 where
     C: Camera + Clone + Send + 'static,
     R: Renderer + Clone + Send + 'static,

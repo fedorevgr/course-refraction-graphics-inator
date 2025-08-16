@@ -24,5 +24,5 @@ approx = "*"
 indicatif = "*"
 
 # GUI
-#egui = "0.31"
-#eframe = "0.31"
+egui = "0.31"
+eframe = "0.31"

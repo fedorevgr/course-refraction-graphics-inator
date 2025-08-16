@@ -7,6 +7,7 @@ use crate::renderer::objects::ray::{Ray, Rgb, Vector};
 use crate::renderer::Renderer;
 use crate::renderer::scene::Scene;
 
+#[derive(Clone, Debug)]
 pub struct PointLight {
     position: Vector,
     color: RgbIntensity,
@@ -33,6 +34,7 @@ impl Ambient for WithSky {
         }
     }
 }
+#[derive(Clone)]
 pub struct Solid {
     color: RgbIntensity,
 }
@@ -47,6 +49,7 @@ impl Ambient for Solid {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct GlobalIllumination<M: Model, A: Ambient> {
     light_list: Vec<PointLight>, 
     scene: Scene<M>,

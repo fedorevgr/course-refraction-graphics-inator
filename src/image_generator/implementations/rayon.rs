@@ -5,7 +5,7 @@ use image::{RgbImage, Rgb};
 use rayon::iter::IntoParallelRefIterator;
 use rayon::prelude::*;
 
-use crate::image_manager::{Color, Manager};
+use crate::image_generator::{Color, ImageGenerator};
 use crate::renderer::objects::camera::Camera;
 use crate::renderer::objects::ray::Rgb as RayRgb;
 use crate::renderer::Renderer;
@@ -55,11 +55,12 @@ impl Library {
             buffer
         }).collect();
 
+
         RgbImage::from_raw(dims.width as u32, dims.height as u32, pixels.iter().flat_map(|pix | pix.0).collect()).unwrap()
     }
 }
 
-impl<C, R> Manager<C, R> for Library
+impl<C, R> ImageGenerator<C, R> for Library
 where
     C: Camera + Clone + Send + 'static + Sync,
     R: Renderer + Clone + Send + 'static + Sync,

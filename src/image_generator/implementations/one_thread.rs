@@ -1,5 +1,5 @@
 use image::RgbImage;
-use crate::image_manager::{Color, Manager};
+use crate::image_generator::{Color, ImageGenerator};
 use crate::renderer::objects::camera::Camera;
 use crate::renderer::Renderer;
 use crate::renderer::objects::ray::Rgb as RayRgb;
@@ -23,7 +23,7 @@ impl OneThreaded {
     }
 }
 
-impl<C, R> Manager<C, R> for OneThreaded
+impl<C, R> ImageGenerator<C, R> for OneThreaded
 where
     C: Camera,
     R: Renderer,

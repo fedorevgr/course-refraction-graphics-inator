@@ -6,6 +6,6 @@ use crate::renderer::Renderer;
 
 pub type Color = image::Rgb<u8>;
 
-pub trait Manager<C: Camera, R: Renderer> {
+pub trait ImageGenerator<C: Camera, R: Renderer> {
     fn create(&self, camera: &C, renderer: &R) -> RgbImage;
 }
