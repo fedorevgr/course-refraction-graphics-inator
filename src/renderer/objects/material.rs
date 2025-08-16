@@ -20,8 +20,14 @@ pub struct Material {
     #[builder(default = RgbIntensity::from([0.; 3]))]
     pub transmittance: RgbIntensity,
 
+    #[builder(default = RgbIntensity::from([0.; 3]))]
+    pub ambient: RgbIntensity,
+
     #[builder(default = 0.0)]
-    pub k: f64
+    pub k: f64,
+
+    #[builder(default = 1.0)]
+    pub env: f64
 }
 
 impl Material {
@@ -32,7 +38,9 @@ impl Material {
             metallic: RgbIntensity::from([1.; 3]),
             roughness: RgbIntensity::from([0.2; 3]),
             transmittance: RgbIntensity::from([0.; 3]),
-            k: 30.
+            ambient: RgbIntensity::from([0.; 3]),
+            k: 30.,
+            env: 1.,
         }
     }
 
@@ -43,7 +51,9 @@ impl Material {
             metallic: RgbIntensity::from([0.; 3]),
             roughness: RgbIntensity::from([0.7; 3]),
             transmittance: RgbIntensity::from([0.; 3]),
-            k: 2.
+            ambient: RgbIntensity::from([0.; 3]),
+            k: 2.,
+            env: 1.,
         }
     }
 }
@@ -56,7 +66,9 @@ impl Default for Material {
             metallic: RgbIntensity::from([0.3; 3]),
             roughness: RgbIntensity::from([0.2; 3]),
             transmittance: RgbIntensity::from([0.; 3]),
-            k: 0.
+            ambient: RgbIntensity::from([0.; 3]),
+            k: 0.,
+            env: 1.,
         }
     }
 }
