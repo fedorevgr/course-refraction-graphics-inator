@@ -72,7 +72,6 @@ pub struct Ray {
 }
 
 impl Ray {
-    pub const ENV_AIR: f64 = 1.;
 
     pub fn new(origin: Vector, direction: Unit, env: f64) -> Ray {
         Ray { origin, direction, env }

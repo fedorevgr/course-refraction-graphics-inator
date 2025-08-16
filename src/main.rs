@@ -82,7 +82,7 @@ fn main() -> Result<(), eframe::Error> {
         ..Default::default()
     };
 
-    let image_generator= OneThreaded {};
+    let image_generator= Library::new(1024);
 
     eframe::run_native(
         "Image Viewer",

@@ -32,13 +32,15 @@ impl Library {
                 [self.size, self.size * i  % dims.width, self.size * i / dims.width, dims.width]
             })
             .collect();
-        blocks.push([leftover, self.size * block_count % dims.width, self.size * block_count / dims.width, dims.width]);
+        if leftover > 0 {
+            blocks.push([leftover, self.size * block_count % dims.width, self.size * block_count / dims.width, dims.width]);
+        }
 
         let pixels: Vec<Color> = blocks.par_iter().flat_map(|&[_size, _x, _y, _width]| {
             let mut x = _x;
             let mut y = _y;
 
-            let mut buffer: Vec<Color> = vec![Color::from([0; 3]); self.size];
+            let mut buffer: Vec<Color> = vec![Color::from([0; 3]); _size];
 
             for i in 0.._size {
                 let ray = camera.gen_ray(x, y);
@@ -54,7 +56,6 @@ impl Library {
             }
             buffer
         }).collect();
-
 
         RgbImage::from_raw(dims.width as u32, dims.height as u32, pixels.iter().flat_map(|pix | pix.0).collect()).unwrap()
     }
