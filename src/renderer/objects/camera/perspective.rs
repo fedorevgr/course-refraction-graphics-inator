@@ -1,15 +1,53 @@
+use egui::WidgetType::SelectableLabel;
 use crate::renderer::objects::camera::{Camera, Dimensions};
+use crate::renderer::objects::model::Transform;
 use crate::renderer::objects::ray::{Matrix, Ray, Unit, Vector, Vector3};
+
+#[derive(Clone)]
+struct Rotation {
+    pub pitch: f64,
+    pub yaw: f64,
+    pub roll: f64,
+
+    pub matrix: Matrix,
+}
+
+impl Rotation {
+    pub fn new(pitch: f64, yaw: f64, roll: f64) -> Self {
+        Self {
+            pitch,
+            yaw,
+            roll,
+            matrix: Self::rotation_matrix(&Vector3::new(pitch, yaw, roll))
+        }
+    }
+
+    pub fn rotation_matrix(axes: &Vector3) -> Matrix {
+        let yaw = axes.z;
+        let pitch = axes.x;
+        Matrix::new_rotation(Vector3::new(0., 0., yaw)) * Matrix::new_rotation(Vector3::new(pitch, 0., 0.))
+    }
+    pub fn set_rotation(&mut self, pitch: f64, yaw: f64, roll: f64) {
+        self.yaw = yaw;
+        self.pitch = pitch;
+        self.roll = roll;
+        self.matrix = Self::rotation_matrix(&Vector3::new(pitch, roll, yaw));
+    }
+
+    pub fn rotate_by(&mut self, pitch: f64, yaw: f64, roll: f64) {
+        self.yaw += yaw;
+        self.pitch += pitch;
+        self.roll += roll;
+        self.matrix = Self::rotation_matrix(&Vector3::new(self.pitch, self.roll, self.yaw));
+    }
+}
 
 #[derive(Clone)]
 pub struct PerspectiveCamera {
     pos: Vector,
-    pitch: f64,
-    yaw: f64,
-    fov: f64,
 
-    pitch_matrix: Matrix,
-    yaw_matrix: Matrix,
+    rotation: Rotation,
+    fov: f64,
 
     pub dims: Dimensions,
 }
@@ -23,13 +61,10 @@ impl PerspectiveCamera {
         let [pitch, yaw] = Self::define_angles(&dir);
 
         PerspectiveCamera {
-            pitch,
-            yaw,
             pos,
             dims,
             fov,
-            pitch_matrix: Matrix::new_rotation(Vector3::new(pitch, 0., 0.)),
-            yaw_matrix: Matrix::new_rotation(Vector3::new(0., 0., yaw))
+            rotation: Rotation::new(pitch, yaw, 0.0),
         }
     }
 
@@ -49,7 +84,7 @@ impl PerspectiveCamera {
     }
 
     fn transition(&self, v: &Vector) -> Vector {
-        self.yaw_matrix * (self.pitch_matrix * v)
+        self.rotation.matrix * v
     }
 
     fn define_angles(dir: &Unit) -> [f64; 2] {
@@ -75,6 +110,25 @@ impl Camera for PerspectiveCamera {
 
     fn get_dimensions(&self) -> &Dimensions {
         &self.dims
+    }
+}
+
+impl Transform for PerspectiveCamera {
+    fn set_position(&mut self, position: Vector) {
+        self.pos = position;
+    }
+
+    fn set_rotation(&mut self, pitch: f64, yaw: f64, roll: f64) {
+        self.rotation.set_rotation(pitch, yaw, roll);
+    }
+
+
+    fn reposition_by(&mut self, pos: &Vector) {
+        self.pos += self.rotation.matrix * pos;
+    }
+
+    fn rotate_by(&mut self, pitch: f64, yaw: f64, roll: f64) {
+        self.rotation.rotate_by(pitch, yaw, roll);
     }
 }
 
@@ -140,7 +194,7 @@ mod tests {
         let target_dir = Unit::new_normalize(target - pos);
         let res_dir = cam.transition(&PerspectiveCamera::DEFAULT_DIR);
 
-        assert_relative_eq!(cam.yaw, 45f64.to_radians(), epsilon = 0.001);
+        assert_relative_eq!(cam.rotation.yaw, 45f64.to_radians(), epsilon = 0.001);
         assert_relative_eq!(res_dir, target_dir.into_inner(), epsilon = 0.001);
     }
 }
