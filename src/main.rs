@@ -199,12 +199,14 @@ where
 {
     fn update(&mut self, ctx: &Context, frame: &mut Frame) {
 
-        let mut actions = Vec::new();
-        for (key, action) in &self.actions {
-            if ctx.input(|i| i.key_down(key.clone())) {
-                actions.push(action);
-            }
-        }
+        let mut actions = Vec::with_capacity(self.actions.len());
+        ctx.input(|i| {
+            i.keys_down.clone().iter().for_each(|k| {
+                if let Some(action) = self.actions.get(k) {
+                    actions.push(action);
+                }
+            });
+        });
         if !actions.is_empty() {
             actions.iter().for_each(|action| {
                 action(&mut self.camera, self.frame_rate);
@@ -221,5 +223,6 @@ where
                 let available_size = ui.available_size();
                 ui.image((self.image.id(), available_size));
             });
+        dbg!(1. / self.frame_rate);
     }
 }
