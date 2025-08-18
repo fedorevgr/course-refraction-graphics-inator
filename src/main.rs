@@ -2,15 +2,16 @@ mod image_generator;
 mod renderer;
 mod tests;
 
-use std::collections::HashMap as Map;
 use crate::renderer::objects::camera::perspective::PerspectiveCamera;
 use crate::renderer::objects::camera::{Camera, Dimensions};
 use crate::renderer::objects::material::MaterialBuilder;
 use crate::renderer::objects::ray::Vector;
 use crate::renderer::scene::Scene;
 use eframe::Frame;
+use egui::accesskit::Role::Search;
 use egui::{Context, Key};
 use image::{ImageBuffer, RgbImage};
+use std::collections::HashMap as Map;
 
 use crate::image_generator::ImageGenerator;
 use crate::image_generator::implementations::one_thread::OneThreaded;
@@ -25,7 +26,7 @@ use crate::renderer::objects::model::{Model, Transform};
 
 fn main() -> Result<(), eframe::Error> {
     let camera = PerspectiveCamera::new(
-        Vector::new(-0., -10., 7., 0.),
+        Vector::new(-1., -10., 7., 0.),
         Vector::new(0., 0., 0., 0.),
         Dimensions {
             width: 1200,
@@ -35,15 +36,16 @@ fn main() -> Result<(), eframe::Error> {
     );
 
     let scene = Scene::new(vec![
-        // SphereModel::new(
-        //     Vector::from([0.; 4]),
-        //     1.,
-        //     MaterialBuilder::default()
-        //         .color([0., 1., 0.].into())
-        //         .roughness([1.; 3].into())
-        //         .metallic([0.; 3].into())
-        //         .build().unwrap()
-        // ),
+        SphereModel::new(
+            Vector::from([0.; 4]),
+            1.,
+            MaterialBuilder::default()
+                .color([0., 1., 0.].into())
+                .roughness([1.; 3].into())
+                .metallic([0.; 3].into())
+                .build()
+                .unwrap(),
+        ),
         SphereModel::new(
             Vector::from([-2., 0., 0., 0.]),
             1.,
@@ -105,7 +107,10 @@ where
     renderer: R,
     generator: G,
     image: egui::TextureHandle,
-    actions: Map<Key, fn(&mut C)>
+
+    actions: Map<Key, fn(&mut C, f64)>,
+
+    frame_rate: f64,
 }
 
 impl<C, G, R> Viewer<C, G, R>
@@ -114,8 +119,18 @@ where
     G: ImageGenerator<C, R>,
     C: Camera + Transform,
 {
+    const POSITION_STEP: f64 = 3.;
+    const ROTATION_STEP: f64 = 0.3;
+    const FORWARD: Vector = Vector::new(0., 0., -Self::POSITION_STEP, 0.);
+    const BACKWARD: Vector = Vector::new(0., 0., Self::POSITION_STEP, 0.);
+    const RIGHT: Vector = Vector::new(Self::POSITION_STEP, 0., 0., 0.);
+    const LEFT: Vector = Vector::new(-Self::POSITION_STEP, 0., 0., 0.);
+    const UP: Vector = Vector::new(0., Self::POSITION_STEP, 0., 0.);
+    const DOWN: Vector = Vector::new(0., -Self::POSITION_STEP, 0., 0.);
+
     pub fn new(cc: &eframe::CreationContext<'_>, camera: C, renderer: R, generator: G) -> Self {
-        let image = generator.create(&camera, &renderer); // Self::create_sample_image(); //
+        let time = std::time::Instant::now();
+        let image = generator.create(&camera, &renderer);
         let size = [image.width() as usize, image.height() as usize];
         let pixels = image.into_raw();
         let color_image = egui::ColorImage::from_rgb(size, pixels.as_slice());
@@ -128,21 +143,42 @@ where
             renderer,
             generator,
             actions: {
-                let mut map:  Map<Key, fn(&mut C)> = Map::new();
-                map.insert(Key::S, |c: &mut C| { c.reposition_by(&[0., 0., 0.1, 0.].into()); });
-                map.insert(Key::W, |c: &mut C| { c.reposition_by(&[0., 0., -0.1, 0.].into()); });
-                map.insert(Key::A, |c: &mut C| { c.reposition_by(&[-0.1, 0., 0., 0.].into()); });
-                map.insert(Key::D, |c: &mut C| { c.reposition_by(&[0.1, 0., 0., 0.].into()); });
-                map.insert(Key::V, |c: &mut C| { c.reposition_by(&[-0.0, 0.1, 0.0, 0.].into()); });
-                map.insert(Key::Space, |c: &mut C| { c.reposition_by(&[-0., -0.1, 0.0, 0.].into()); });
+                let mut map: Map<Key, fn(&mut C, f64)> = Map::new();
+                map.insert(Key::S, |c: &mut C, k: f64| {
+                    c.reposition_by(&(Self::BACKWARD * k));
+                });
+                map.insert(Key::W, |c: &mut C, k: f64| {
+                    c.reposition_by(&(Self::FORWARD * k));
+                });
+                map.insert(Key::A, |c: &mut C, k: f64| {
+                    c.reposition_by(&(Self::LEFT * k));
+                });
+                map.insert(Key::D, |c: &mut C, k: f64| {
+                    c.reposition_by(&(Self::RIGHT * k));
+                });
+                map.insert(Key::V, |c: &mut C, k: f64| {
+                    c.reposition_by(&(Self::UP * k));
+                });
+                map.insert(Key::Space, |c: &mut C, k: f64| {
+                    c.reposition_by(&(Self::DOWN * k));
+                });
 
-                map.insert(Key::ArrowUp, |c: &mut C| { c.rotate_by(0.1, 0., 0.); });
-                map.insert(Key::ArrowDown, |c: &mut C| { c.rotate_by(-0.1, 0., 0.); });
-                map.insert(Key::ArrowLeft, |c: &mut C| { c.rotate_by(0., -0.05, 0.); });
-                map.insert(Key::ArrowRight, |c: &mut C| { c.rotate_by(0., 0.05, 0.); });
+                map.insert(Key::ArrowUp, |c: &mut C, k: f64| {
+                    c.rotate_by(Self::ROTATION_STEP * k, 0., 0.);
+                });
+                map.insert(Key::ArrowDown, |c: &mut C, k: f64| {
+                    c.rotate_by(-Self::ROTATION_STEP * k, 0., 0.);
+                });
+                map.insert(Key::ArrowLeft, |c: &mut C, k: f64| {
+                    c.rotate_by(0., Self::ROTATION_STEP * k, 0.);
+                });
+                map.insert(Key::ArrowRight, |c: &mut C, k: f64| {
+                    c.rotate_by(0., -Self::ROTATION_STEP * k, 0.);
+                });
 
                 map
-            }
+            },
+            frame_rate: time.elapsed().as_secs_f64(),
         }
     }
 
@@ -162,16 +198,21 @@ where
     C: Camera + Transform,
 {
     fn update(&mut self, ctx: &Context, frame: &mut Frame) {
-        if let Some(action) = ctx.input(|i| {
-            for (key, action) in &self.actions {
-                if i.key_down(key.clone()) {
-                    return Some(action);
-                }
+
+        let mut actions = Vec::new();
+        for (key, action) in &self.actions {
+            if ctx.input(|i| i.key_down(key.clone())) {
+                actions.push(action);
             }
-            None
-        }) {
-            action(&mut self.camera);
+        }
+        if !actions.is_empty() {
+            actions.iter().for_each(|action| {
+                action(&mut self.camera, self.frame_rate);
+            });
+
+            let time = std::time::Instant::now();
             self.image = self.render_new(&ctx);
+            self.frame_rate = time.elapsed().as_secs_f64();
         }
 
         egui::CentralPanel::default()

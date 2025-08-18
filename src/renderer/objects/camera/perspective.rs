@@ -9,7 +9,9 @@ struct Rotation {
     pub yaw: f64,
     pub roll: f64,
 
-    pub matrix: Matrix,
+    // pub matrix: Matrix,
+    pub yaw_matrix: Matrix,
+    pub pitch_matrix: Matrix,
 }
 
 impl Rotation {
@@ -18,7 +20,9 @@ impl Rotation {
             pitch,
             yaw,
             roll,
-            matrix: Self::rotation_matrix(&Vector3::new(pitch, yaw, roll))
+            // matrix: Self::rotation_matrix(&Vector3::new(pitch, yaw, roll))
+            yaw_matrix: Matrix::new_rotation(Vector3::new(0., 0., yaw)),
+            pitch_matrix: Matrix::new_rotation(Vector3::new(pitch, 0., 0.))
         }
     }
 
@@ -31,14 +35,18 @@ impl Rotation {
         self.yaw = yaw;
         self.pitch = pitch;
         self.roll = roll;
-        self.matrix = Self::rotation_matrix(&Vector3::new(pitch, roll, yaw));
+        // self.matrix = Self::rotation_matrix(&Vector3::new(pitch, roll, yaw));
     }
 
     pub fn rotate_by(&mut self, pitch: f64, yaw: f64, roll: f64) {
+
         self.yaw += yaw;
         self.pitch += pitch;
         self.roll += roll;
-        self.matrix = Self::rotation_matrix(&Vector3::new(self.pitch, self.roll, self.yaw));
+
+        // self.matrix = Self::rotation_matrix(&Vector3::new(self.pitch, self.roll, self.yaw));
+        self.yaw_matrix = Matrix::new_rotation(Vector3::new(0., 0., self.yaw));
+        self.pitch_matrix = Matrix::new_rotation(Vector3::new(self.pitch, 0., 0.))
     }
 }
 
@@ -84,7 +92,7 @@ impl PerspectiveCamera {
     }
 
     fn transition(&self, v: &Vector) -> Vector {
-        self.rotation.matrix * v
+        self.rotation.yaw_matrix * (self.rotation.pitch_matrix * v)
     }
 
     fn define_angles(dir: &Unit) -> [f64; 2] {
@@ -124,7 +132,7 @@ impl Transform for PerspectiveCamera {
 
 
     fn reposition_by(&mut self, pos: &Vector) {
-        self.pos += self.rotation.matrix * pos;
+        self.pos += self.rotation.yaw_matrix * (self.rotation.pitch_matrix * pos);
     }
 
     fn rotate_by(&mut self, pitch: f64, yaw: f64, roll: f64) {
