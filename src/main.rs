@@ -12,14 +12,14 @@ use egui::accesskit::Role::Search;
 use egui::{Context, Key};
 use image::{ImageBuffer, RgbImage};
 use std::collections::HashMap as Map;
-
+use rand::SeedableRng;
 use crate::image_generator::ImageGenerator;
-use crate::image_generator::implementations::one_thread::OneThreaded;
 use crate::image_generator::implementations::rayon::Library;
 use crate::renderer::Renderer;
 use crate::renderer::implementations::global_illumination::{
     GlobalIllumination, PointLight, Solid, WithSky,
 };
+use crate::renderer::implementations::sampling::{Black, Sampling};
 use crate::renderer::implementations::simple_illumination::SimpleIllumination;
 use crate::renderer::objects::model::sphere::SphereModel;
 use crate::renderer::objects::model::{Model, Transform};
@@ -29,8 +29,8 @@ fn main() -> Result<(), eframe::Error> {
         Vector::new(-1., -10., 7., 0.),
         Vector::new(0., 0., 0., 0.),
         Dimensions {
-            width: 1200,
-            height: 800,
+            width: 800,
+            height: 500,
         },
         std::f64::consts::FRAC_PI_6,
     );
@@ -79,6 +79,7 @@ fn main() -> Result<(), eframe::Error> {
     //     Solid::new([0.; 3].into()),
     // );
     let renderer = SimpleIllumination::new(scene);
+    // let renderer = Sampling::new(scene, Black{}, 2, rand_xoshiro::Xoroshiro128PlusPlus::seed_from_u64(0), 2);
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()

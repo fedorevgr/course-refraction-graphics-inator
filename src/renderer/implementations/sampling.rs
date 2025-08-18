@@ -1,6 +1,8 @@
 #![allow(unused)]
 
 use std::cell::RefCell;
+use std::ops::DerefMut;
+use std::sync::{Arc, Mutex};
 use nalgebra::Vector4;
 use crate::renderer::Renderer;
 use crate::renderer::objects::hit::Hit;
@@ -28,18 +30,18 @@ pub struct Sampling<M: Model, E: Environment, R: Rng + Clone> {
     scene: Scene<M>,
     environment: E,
     bounce_limit: usize,
-    rng: RefCell<R>,
+    rng: Arc<Mutex<R>>,
     samples: usize
 }
 
 impl<M: Model, E: Environment, R: Rng + Clone> Sampling<M, E, R> {
-    pub fn new(scene: Scene<M>, environment: E, bounce_limit: usize, rng: R) -> Self {
+    pub fn new(scene: Scene<M>, environment: E, bounce_limit: usize, rng: R, samples: usize) -> Self {
         Self {
             scene,
             environment,
             bounce_limit,
-            rng: RefCell::new(rng),
-            samples: 50
+            rng: Arc::new(Mutex::new(rng)),
+            samples
         }
     }
 
@@ -56,11 +58,13 @@ impl<M: Model, E: Environment, R: Rng + Clone> Sampling<M, E, R> {
 
         let t2 = Unit3::new_unchecked(t1.cross(&norm3));
 
-        let r1 = self.rng.borrow_mut().random::<f64>();
-        let r2 = self.rng.borrow_mut().random::<f64>() * std::f64::consts::TAU;
+        let mut rng = self.rng.lock().unwrap();
+        let r1 = (*rng).random::<f64>();
+        let r2 = (*rng).random::<f64>() * std::f64::consts::TAU;
+
 
         let cos = r1.sqrt();
-        let sin = (1. - r1).sqrt();
+        let sin = (1f64 - r1).sqrt();
 
         Unit::new_unchecked(
             (norm3.scale(cos) + t1.scale(sin * r2.sin()) + t2.scale(sin * r2.cos()))
@@ -73,7 +77,7 @@ impl<M: Model, E: Environment, R: Rng + Clone> Sampling<M, E, R> {
     }
 
     fn define_new_ray(&self, original: &Ray, hit: &Hit) -> Ray {
-        let specular = self.rng.borrow_mut().random::<f32>();
+        let specular = self.rng.lock().unwrap().random::<f32>();
 
         Ray {
             direction: if specular <= hit.material.metallic.x {
