@@ -14,6 +14,7 @@ use image::{ImageBuffer, RgbImage};
 use std::collections::HashMap as Map;
 use rand::SeedableRng;
 use crate::image_generator::ImageGenerator;
+use crate::image_generator::implementations::one_thread::OneThreaded;
 use crate::image_generator::implementations::rayon::Library;
 use crate::renderer::Renderer;
 use crate::renderer::implementations::global_illumination::{
@@ -26,13 +27,13 @@ use crate::renderer::objects::model::{Model, Transform};
 
 fn main() -> Result<(), eframe::Error> {
     let camera = PerspectiveCamera::new(
-        Vector::new(-1., -10., 7., 0.),
+        Vector::new(5., -5., 5., 0.),
         Vector::new(0., 0., 0., 0.),
         Dimensions {
-            width: 800,
-            height: 500,
+            width: 1200,
+            height: 800,
         },
-        std::f64::consts::FRAC_PI_6,
+        std::f64::consts::FRAC_PI_6 / 1.,
     );
 
     let scene = Scene::new(vec![
@@ -50,9 +51,10 @@ fn main() -> Result<(), eframe::Error> {
             Vector::from([-2., 0., 0., 0.]),
             1.,
             MaterialBuilder::default()
-                .color([0., 0., 1.].into())
-                .roughness([1.; 3].into())
-                .metallic([0.; 3].into())
+                .color([0.2, 0.2, 0.2].into())
+                .roughness([0.2; 3].into())
+                .metallic([0.8; 3].into())
+                .ambient([0.; 3].into())
                 .build()
                 .unwrap(),
         ),
@@ -68,18 +70,19 @@ fn main() -> Result<(), eframe::Error> {
         ),
     ]);
 
-    // let renderer = GlobalIllumination::new(
-    //     scene,
-    //     vec![PointLight::new(
-    //         [0., 0., 4., 0.].into(),
-    //         2.,
-    //         [1., 1., 1.].into(),
-    //     )],
-    //     3,
-    //     Solid::new([0.; 3].into()),
-    // );
-    let renderer = SimpleIllumination::new(scene);
-    // let renderer = Sampling::new(scene, Black{}, 2, rand_xoshiro::Xoroshiro128PlusPlus::seed_from_u64(0), 2);
+    let renderer = GlobalIllumination::new(
+        scene,
+        vec![PointLight::new(
+            [0., 0., 4., 0.].into(),
+            20.,
+            [1., 1., 1.].into(),
+        )],
+        5,
+        Solid::new([0.05; 3].into()),
+        //WithSky{}
+    );
+    // let renderer = SimpleIllumination::new(scene);
+    // let renderer = Sampling::new(scene, Black{}, 2, rand_xoshiro::Xoroshiro128PlusPlus::seed_from_u64(0), 5);
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
@@ -90,6 +93,9 @@ fn main() -> Result<(), eframe::Error> {
     };
 
     let image_generator = Library::new(1024);
+    // let image_generator = OneThreaded {};
+    // let _ = image_generator.create(&camera, &renderer).save("artifacts/Test.png").unwrap();
+    // Ok(())
 
     eframe::run_native(
         "Image Viewer",

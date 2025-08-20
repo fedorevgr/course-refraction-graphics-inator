@@ -68,18 +68,18 @@ impl Rgb {
 pub struct Ray {
     pub origin: Vector,
     pub direction: Unit,
-    pub env: f64
+    pub ior: f64
 }
 
 impl Ray {
 
     pub fn new(origin: Vector, direction: Unit, env: f64) -> Ray {
-        Ray { origin, direction, env }
+        Ray { origin, direction, ior: env }
     }
 
     pub fn refracted_dir(&self, normal: &Unit, env_nu: f64) -> Option<Unit>
     {
-        let r = self.env / env_nu;
+        let r = self.ior / env_nu;
         let c = -self.direction.dot(&normal);
         let d = 1. - r * r * (1.0 - c * c);
 

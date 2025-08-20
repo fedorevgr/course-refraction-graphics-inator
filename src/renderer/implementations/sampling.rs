@@ -86,7 +86,7 @@ impl<M: Model, E: Environment, R: Rng + Clone> Sampling<M, E, R> {
                 self.diffused_dir(&hit.normal)
             },
             origin: hit.pos,
-            env: 1.
+            ior: 1.
         }
     }
     fn cast_once(&self, ray: &Ray) -> RgbIntensity {
@@ -114,7 +114,7 @@ impl<M: Model, E: Environment, R: Rng + Clone> Sampling<M, E, R> {
 
 impl<M: Model, E: Environment, R: Rng + Clone> Renderer for Sampling<M, E, R> {
     fn cast(&self, ray: &Ray) -> RgbIntensity {
-        (0..self.samples).map(|_| self.cast_once(ray)).sum()
+        (1. / self.samples as f32) * (0..self.samples).map(|_| self.cast_once(ray)).sum::<RgbIntensity>()
     }
 }
 
