@@ -97,10 +97,10 @@ impl<M: Model, E: Environment, R: Rng + Clone> Sampling<M, E, R> {
 
         for _ in 0..self.bounce_limit {
             if let Some(hit) = self.scene.intersect(&current_ray) {
-                current_ray = self.define_new_ray(&mut current_ray, &hit);
+                current_ray = self.define_new_ray(&current_ray, &hit);
 
                 let emitted = &hit.material.emissivity;
-                emission_collected = emission_collected + emitted.component_mul(&color);
+                emission_collected += emitted.component_mul(&color);
                 color = hit.material.color.component_mul(&color);
             } else {
                 emission_collected = self.environment.evaluate(&current_ray).component_mul(&color) + emission_collected;

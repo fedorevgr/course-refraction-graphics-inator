@@ -11,11 +11,20 @@ pub trait Model {
     fn hit(&self, ray: &Ray) -> Option<Hit>;
 }
 
-pub trait Transform {
-    fn set_position(&mut self, position: Vector);
+
+#[allow(dead_code)]
+pub trait Rotate {
     fn set_rotation(&mut self, pitch: f64, yaw: f64, roll: f64);
-
-    fn reposition_by(&mut self, pos: &Vector);
-
     fn rotate_by(&mut self, pitch: f64, yaw: f64, roll: f64);
+}
+
+#[allow(dead_code)]
+pub trait Move {
+    fn set_position(&mut self, position: Vector);
+    fn reposition_by(&mut self, pos: &Vector);
+}
+
+#[allow(dead_code)]
+pub trait Scale {
+    
 }

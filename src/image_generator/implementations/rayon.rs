@@ -42,11 +42,11 @@ impl Library {
 
             let mut buffer: Vec<Color> = vec![Color::from([0; 3]); _size];
 
-            for i in 0.._size {
+            for pixel in buffer.iter_mut().take(_size) {
                 let ray = camera.gen_ray(x, y);
                 let col = renderer.cast(&ray);
 
-                buffer[i] = RayRgb(col).to_pixel().into();
+                pixel.0 = RayRgb(col).to_pixel();
 
                 x += 1;
                 if x == _width {

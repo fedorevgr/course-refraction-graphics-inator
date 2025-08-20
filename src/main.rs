@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 mod image_generator;
 mod renderer;
 mod tests;
@@ -23,7 +25,7 @@ use crate::renderer::implementations::global_illumination::{
 use crate::renderer::implementations::sampling::{Black, Sampling};
 use crate::renderer::implementations::simple_illumination::SimpleIllumination;
 use crate::renderer::objects::model::sphere::SphereModel;
-use crate::renderer::objects::model::{Model, Transform};
+use crate::renderer::objects::model::{Model, Move, Rotate};
 
 fn main() -> Result<(), eframe::Error> {
     let camera = PerspectiveCamera::new(
@@ -54,6 +56,17 @@ fn main() -> Result<(), eframe::Error> {
                 .color([0.2, 0.2, 0.2].into())
                 .roughness([0.2; 3].into())
                 .metallic([0.8; 3].into())
+                .ambient([0.; 3].into())
+                .build()
+                .unwrap(),
+        ),
+        SphereModel::new(
+            Vector::from([-1., 1., 0., 0.]),
+            0.5,
+            MaterialBuilder::default()
+                .color([0.5, 0.2, 0.2].into())
+                .roughness([0.8; 3].into())
+                .metallic([0.2; 3].into())
                 .ambient([0.; 3].into())
                 .build()
                 .unwrap(),
@@ -108,7 +121,7 @@ struct Viewer<C, G, R>
 where
     R: Renderer,
     G: ImageGenerator<C, R>,
-    C: Camera + Transform,
+    C: Camera + Move + Rotate,
 {
     camera: C,
     renderer: R,
@@ -124,7 +137,7 @@ impl<C, G, R> Viewer<C, G, R>
 where
     R: Renderer,
     G: ImageGenerator<C, R>,
-    C: Camera + Transform,
+    C: Camera + Move + Rotate,
 {
     const POSITION_STEP: f64 = 3.;
     const ROTATION_STEP: f64 = 0.3;
@@ -202,9 +215,9 @@ impl<C, G, R> eframe::App for Viewer<C, G, R>
 where
     R: Renderer,
     G: ImageGenerator<C, R>,
-    C: Camera + Transform,
+    C: Camera + Move + Rotate,
 {
-    fn update(&mut self, ctx: &Context, frame: &mut Frame) {
+    fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
 
         let mut actions = Vec::with_capacity(self.actions.len());
         ctx.input(|i| {
@@ -220,8 +233,9 @@ where
             });
 
             let time = std::time::Instant::now();
-            self.image = self.render_new(&ctx);
+            self.image = self.render_new(ctx);
             self.frame_rate = time.elapsed().as_secs_f64();
+            dbg!(1. / self.frame_rate);
         }
 
         egui::CentralPanel::default()
@@ -230,6 +244,6 @@ where
                 let available_size = ui.available_size();
                 ui.image((self.image.id(), available_size));
             });
-        dbg!(1. / self.frame_rate);
+
     }
 }

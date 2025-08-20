@@ -35,10 +35,7 @@ impl Triangle {
         let mut area = self.area;
         for i in 0..3 {
             let side = Vector3::from_homogeneous(self.points[i] - self.points[(i + 1) % 3]).unwrap();
-            let to_point = Vector3::from_homogeneous(point - self.points[i]).unwrap_or_else( || {
-                println!("Stop");
-                Vector3::from_homogeneous(point.clone()).unwrap()
-            });
+            let to_point = Vector3::from_homogeneous(point - self.points[i]).unwrap();
             area -= side.cross(&to_point).norm().abs() / 2.;
         }
         area.abs() <= Self::EPSILON

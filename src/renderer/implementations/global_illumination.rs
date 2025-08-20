@@ -47,7 +47,7 @@ impl Solid {
     }
 }
 impl Ambient for Solid {
-    fn evaluate(&self, ray: &Ray, hit: &Option<Hit>) -> RgbIntensity {
+    fn evaluate(&self, _ray: &Ray, _hit: &Option<Hit>) -> RgbIntensity {
         self.color
     }
 }
@@ -75,7 +75,7 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
         }).sum()
     }
 
-    fn _diffusive(&self, ray: &Ray, hit: &Hit) -> RgbIntensity {
+    fn _diffusive(&self, _ray: &Ray, hit: &Hit) -> RgbIntensity {
         self.light_list.iter().map(|light| {
             let light_vector = (light.position - hit.pos).normalize();
             let cosine = light_vector.dot(&hit.normal).max(0.).abs() as f32;
@@ -84,7 +84,7 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
     }
 
     fn _ambient(&self, ray: &Ray, hit: &Option<Hit>) -> RgbIntensity {
-        self.ambient.evaluate(&ray, hit)
+        self.ambient.evaluate(ray, hit)
     }
 
     #[inline]
@@ -104,7 +104,7 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
     fn _cast(&self, ray: &Ray, depth: usize) -> RgbIntensity {
 
         let ray_hit = self.scene.intersect(ray);
-        let mut intensity = self._ambient(&ray, &ray_hit);
+        let mut intensity = self._ambient(ray, &ray_hit);
 
         if let Some(hit) = ray_hit {
             intensity += self._diffusive(ray, &hit) + self._specular(ray, &hit);

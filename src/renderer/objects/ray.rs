@@ -31,6 +31,7 @@ impl Rgb {
     }
     
     #[inline]
+    #[allow(dead_code)]
     pub fn from_pixel(v: [u8; 3]) -> RgbIntensity {
         RgbIntensity::new(v[0] as f32 / 255., v[1] as f32 / 255., v[2] as f32 / 255.)    
     }
@@ -80,7 +81,7 @@ impl Ray {
     pub fn refracted_dir(&self, normal: &Unit, env_nu: f64) -> Option<Unit>
     {
         let r = self.ior / env_nu;
-        let c = -self.direction.dot(&normal);
+        let c = -self.direction.dot(normal);
         let d = 1. - r * r * (1.0 - c * c);
 
         if d <= 0. {

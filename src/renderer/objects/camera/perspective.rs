@@ -1,6 +1,5 @@
-use egui::WidgetType::SelectableLabel;
 use crate::renderer::objects::camera::{Camera, Dimensions};
-use crate::renderer::objects::model::Transform;
+use crate::renderer::objects::model::{Move, Rotate};
 use crate::renderer::objects::ray::{Matrix, Ray, Unit, Vector, Vector3};
 
 #[derive(Clone)]
@@ -121,22 +120,25 @@ impl Camera for PerspectiveCamera {
     }
 }
 
-impl Transform for PerspectiveCamera {
+impl Move for PerspectiveCamera {
     fn set_position(&mut self, position: Vector) {
         self.pos = position;
-    }
-
-    fn set_rotation(&mut self, pitch: f64, yaw: f64, roll: f64) {
-        self.rotation.set_rotation(pitch, yaw, roll);
     }
 
 
     fn reposition_by(&mut self, pos: &Vector) {
         self.pos += self.rotation.yaw_matrix * (self.rotation.pitch_matrix * pos);
     }
+}
 
+
+impl Rotate for PerspectiveCamera {
     fn rotate_by(&mut self, pitch: f64, yaw: f64, roll: f64) {
         self.rotation.rotate_by(pitch, yaw, roll);
+    }
+
+    fn set_rotation(&mut self, pitch: f64, yaw: f64, roll: f64) {
+        self.rotation.set_rotation(pitch, yaw, roll);
     }
 }
 

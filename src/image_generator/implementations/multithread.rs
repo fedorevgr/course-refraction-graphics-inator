@@ -43,11 +43,11 @@ impl<C: Camera + Send + 'static, R: Renderer + Send + 'static> Block<C, R> {
 
             let mut buffer: Vec<Color> = vec![Color::from([0; 3]); self.size];
 
-            for i in 0..self.size {
+            for pixel in buffer.iter_mut().take(self.size) {
                 let ray = self.camera.gen_ray(x, y);
                 let col = self.renderer.cast(&ray);
 
-                buffer[i] = RayRgb(col).to_pixel().into();
+                pixel.0 = RayRgb(col).to_pixel();
 
                 x += 1;
                 if x == self.dimensions.width {
