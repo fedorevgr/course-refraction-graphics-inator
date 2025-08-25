@@ -43,9 +43,12 @@ fn main() -> Result<(), eframe::Error> {
             Vector::from([0.; 4]),
             1.,
             MaterialBuilder::default()
-                .color([0., 1., 0.].into())
-                .roughness([1.; 3].into())
+                .color([1.; 3].into())
+                .roughness([0.; 3].into())
                 .metallic([0.; 3].into())
+                .transmittance([1.; 3].into())
+                .ambient([0.; 3].into())
+                .ior(1.1)
                 .build()
                 .unwrap(),
         ),
@@ -86,12 +89,12 @@ fn main() -> Result<(), eframe::Error> {
     let renderer = GlobalIllumination::new(
         scene,
         vec![PointLight::new(
-            [0., 0., 4., 0.].into(),
-            20.,
+            [0., -2., 2., 0.].into(),
+            30.,
             [1., 1., 1.].into(),
         )],
         5,
-        Solid::new([0.05; 3].into()),
+        Solid::new([0.8; 3].into()),
         //WithSky{}
     );
     // let renderer = SimpleIllumination::new(scene);
@@ -106,7 +109,7 @@ fn main() -> Result<(), eframe::Error> {
     };
 
     let image_generator = Library::new(1024);
-    // let image_generator = OneThreaded {};
+
     // let _ = image_generator.create(&camera, &renderer).save("artifacts/Test.png").unwrap();
     // Ok(())
 

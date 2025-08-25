@@ -26,7 +26,7 @@ impl Environment for Black {
 }
 
 #[derive(Debug, Clone)]
-pub struct Sampling<M: Model, E: Environment, R: Rng + Clone> {
+pub struct Sampling<M: Model, E: Environment, R: Rng> {
     scene: Scene<M>,
     environment: E,
     bounce_limit: usize,
@@ -34,7 +34,7 @@ pub struct Sampling<M: Model, E: Environment, R: Rng + Clone> {
     samples: usize
 }
 
-impl<M: Model, E: Environment, R: Rng + Clone> Sampling<M, E, R> {
+impl<M: Model, E: Environment, R: Rng> Sampling<M, E, R> {
     pub fn new(scene: Scene<M>, environment: E, bounce_limit: usize, rng: R, samples: usize) -> Self {
         Self {
             scene,
@@ -61,7 +61,7 @@ impl<M: Model, E: Environment, R: Rng + Clone> Sampling<M, E, R> {
         let mut rng = self.rng.lock().unwrap();
         let r1 = (*rng).random::<f64>();
         let r2 = (*rng).random::<f64>() * std::f64::consts::TAU;
-
+        drop(rng);
 
         let cos = r1.sqrt();
         let sin = (1f64 - r1).sqrt();
@@ -112,7 +112,7 @@ impl<M: Model, E: Environment, R: Rng + Clone> Sampling<M, E, R> {
     }
 }
 
-impl<M: Model, E: Environment, R: Rng + Clone> Renderer for Sampling<M, E, R> {
+impl<M: Model, E: Environment, R: Rng> Renderer for Sampling<M, E, R> {
     fn cast(&self, ray: &Ray) -> RgbIntensity {
         (1. / self.samples as f32) * (0..self.samples).map(|_| self.cast_once(ray)).sum::<RgbIntensity>()
     }

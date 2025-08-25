@@ -112,8 +112,9 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
             if depth < self.bounce_limit {
                 intensity += self._cast(&Ray::new(hit.pos, ray.reflected_dir(&hit.normal), ray.ior), depth + 1).component_mul(&hit.material.metallic);
 
-                if let Some(refracted_dir) = ray.refracted_dir(&hit.normal, hit.material.env) {
-                    intensity += self._cast(&Ray::new(hit.pos, refracted_dir, hit.material.env), depth + 1).component_mul(&hit.material.transmittance);
+                let ior = if hit.normal.dot(&ray.direction) <= 0. {hit.material.ior} else {1.0};
+                if let Some(refracted_dir) = ray.refracted_dir(&hit.normal, ior) {
+                    intensity += self._cast(&Ray::new(hit.pos, refracted_dir, ior), depth + 1).component_mul(&hit.material.transmittance);
                 }
             }
             intensity = intensity.component_mul(&hit.material.color) / ((hit.pos - ray.origin).magnitude() as f32 + 1.);
