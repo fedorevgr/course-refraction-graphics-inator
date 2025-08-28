@@ -81,7 +81,8 @@ impl Ray {
     pub fn refracted_dir(&self, normal: &Unit, env_nu: f64) -> Option<Unit>
     {
         let r = self.ior / env_nu;
-        let c = self.direction.dot(normal).abs();
+        let c = self.direction.dot(normal);
+        let sign = c.signum();
         let d = 1. - r * r * (1.0 - c * c);
 
         if d <= 0. {
@@ -89,7 +90,7 @@ impl Ray {
         }
         else {
             Some(Unit::new_unchecked(
-                self.direction.scale(r) + normal.scale(r*c - d.sqrt())
+                self.direction.scale(r) + normal.scale((r * (-c) - d.sqrt()))
             ))
         }
     }
@@ -110,12 +111,29 @@ mod tests {
     use crate::renderer::objects::ray::{Ray, Vector, Unit};
 
     #[test]
-    fn test_refracted() {
+    fn test_refracted_direction() {
         let norm = Unit::new_normalize([0., 0., 1., 0.].into());
         let tangent = Unit::new_normalize([1., 1., 0., 0.].into());
 
         let start_ior = 1.0;
         let ior = 1.33;
+        let start_angle = 30f64.to_radians();
+        let end_angle = (start_ior / ior * start_angle.sin()).asin();
+
+        let start_dir = -Unit::new_normalize(tangent.scale(start_angle.sin()) + norm.scale(start_angle.cos()));
+        let start_ray = Ray::new([0.; 4].into(), start_dir, start_ior);
+        let refracted = start_ray.refracted_dir(&norm, ior).unwrap();
+
+        assert_relative_eq!(refracted, -Unit::new_normalize(tangent.scale(end_angle.sin()) + norm.scale(end_angle.cos())));
+    }
+
+    #[test]
+    fn test_inner_refracted_direction() {
+        let norm = -Unit::new_normalize([0., 0., 1., 0.].into());
+        let tangent = Unit::new_normalize([1., 1., 0., 0.].into());
+
+        let start_ior = 1.33;
+        let ior = 1.0;
         let start_angle = 30f64.to_radians();
         let end_angle = (start_ior / ior * start_angle.sin()).asin();
 
