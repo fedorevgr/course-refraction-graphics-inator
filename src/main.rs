@@ -53,13 +53,13 @@ fn main() -> Result<(), eframe::Error> {
                 .unwrap(),
         ),
         SphereModel::new(
-            Vector::from([-1., 0., 0., 0.]),
+            Vector::from([-3., 0., 1., 0.]),
             0.5,
             MaterialBuilder::default()
                 .color([0.5, 0.2, 0.2].into())
                 .roughness([0.8; 3].into())
                 .metallic([0.2; 3].into())
-                .ambient([0.; 3].into())
+                .ambient([0.3; 3].into())
                 .build()
                 .unwrap(),
         ),
@@ -89,24 +89,24 @@ fn main() -> Result<(), eframe::Error> {
     // let renderer = SimpleIllumination::new(scene);
     // let renderer = Sampling::new(scene, Black{}, 2, rand_xoshiro::Xoroshiro128PlusPlus::seed_from_u64(0), 5);
 
-    // let options = eframe::NativeOptions {
-    //     viewport: egui::ViewportBuilder::default()
-    //         .with_inner_size([1200., 800.0])
-    //         .with_resizable(false)
-    //         .with_transparent(false),
-    //     ..Default::default()
-    // };
+    let options = eframe::NativeOptions {
+        viewport: egui::ViewportBuilder::default()
+            .with_inner_size([1200., 800.0])
+            .with_resizable(false)
+            .with_transparent(false),
+        ..Default::default()
+    };
 
     let image_generator = Library::new(1024);
 
-    let _ = image_generator.create(&camera, &renderer).save("artifacts/Test.png").unwrap();
-    Ok(())
+    // let _ = image_generator.create(&camera, &renderer).save("artifacts/Test.png").unwrap();
+    // Ok(())
 
-    // eframe::run_native(
-    //     "Image Viewer",
-    //     options,
-    //     Box::new(|cc| Ok(Box::new(Viewer::new(cc, camera, renderer, image_generator)))),
-    // )
+    eframe::run_native(
+        "Image Viewer",
+        options,
+        Box::new(|cc| Ok(Box::new(Viewer::new(cc, camera, renderer, image_generator)))),
+    )
 }
 
 struct Viewer<C, G, R>

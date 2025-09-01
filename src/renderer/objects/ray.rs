@@ -80,9 +80,12 @@ impl Ray {
 
     pub fn refracted_dir(&self, normal: &Unit, env_nu: f64) -> Option<Unit>
     {
+        let dot_prod = self.direction.dot(normal);
+        let norm = if dot_prod > 0. {normal.scale(-1.)} else { *normal.clone() };
+
         let r = self.ior / env_nu;
-        let c = self.direction.dot(normal);
-        let sign = c.signum();
+        let c = -self.direction.dot(&norm);
+
         let d = 1. - r * r * (1.0 - c * c);
 
         if d <= 0. {
@@ -90,7 +93,7 @@ impl Ray {
         }
         else {
             Some(Unit::new_unchecked(
-                self.direction.scale(r) + normal.scale((r * (-c) - d.sqrt()))
+                self.direction.scale(r) + norm.scale(r * c - d.sqrt())
             ))
         }
     }
@@ -129,7 +132,7 @@ mod tests {
 
     #[test]
     fn test_inner_refracted_direction() {
-        let norm = -Unit::new_normalize([0., 0., 1., 0.].into());
+        let norm = Unit::new_normalize([0., 0., 1., 0.].into());
         let tangent = Unit::new_normalize([1., 1., 0., 0.].into());
 
         let start_ior = 1.33;
@@ -140,7 +143,23 @@ mod tests {
         let start_dir = -Unit::new_normalize(tangent.scale(start_angle.sin()) + norm.scale(start_angle.cos()));
         let start_ray = Ray::new([0.; 4].into(), start_dir, start_ior);
         let refracted = start_ray.refracted_dir(&norm, ior).unwrap();
+        let refracted_2 = start_ray.refracted_dir(&-norm, ior).unwrap();
 
         assert_relative_eq!(refracted, -Unit::new_normalize(tangent.scale(end_angle.sin()) + norm.scale(end_angle.cos())));
+        assert_relative_eq!(refracted, refracted_2);
     }
+
+    // #[test]
+    // fn test_glass_refracted_displacement() {
+    //     let norm = Unit::new_normalize([0., 1., 1., 0.].into());
+    //     let ior = 1.33;
+    //     let start_ray = Ray::new([0., 0., 2., 0.].into(), -Vector::z_axis(), 1.);
+    //
+    //     let phi = (ior * std::f64::consts::FRAC_PI_4.sin()).asin();
+    //     let shift = (phi + std::f64::consts::FRAC_PI_4).sin() * std::f64::consts::SQRT_2 * phi.cos();
+    //
+    //     let first_refracted = Ray::new([0.; 4].into(), start_ray.refracted_dir(&norm, ior).unwrap(), ior);
+    //
+    //
+    // }
 }
