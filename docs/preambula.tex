@@ -1,4 +1,4 @@
-\documentclass[a4paper, 12pt]{extreport}
+\documentclass[a4paper, 14pt]{extreport}
 
 \usepackage[T2A]{fontenc}
 \usepackage[utf8]{inputenc}
@@ -60,7 +60,7 @@
 %\titlespacing*{\subsection}{0pt}{\baselineskip}{\baselineskip}
 
 \geometry{left=30mm}
-\geometry{right=10mm}
+\geometry{right=15mm}
 \geometry{top=20mm}
 \geometry{bottom=20mm}
 
@@ -124,46 +124,27 @@
 
 \RequirePackage{listings}
 \RequirePackage{listingsutf8}
-% \lstset{ %
-% 	language=caml,                 % выбор языка для подсветки (здесь это С)
-% 	basicstyle=\small\ttfamily, % размер и начертание шрифта для подсветки кода
-% 	numbers=none,               % где поставить нумерацию строк (слева\справа)
-% 	numberstyle=\tiny,           % размер шрифта для номеров строк
-% 	stepnumber=1,                   % размер шага между двумя номерами строк
-% %	numbersep=5pt,                % как далеко отстоят номера строк от подсвечиваемого кода
-% 	showspaces=false,            % показывать или нет пробелы специальными отступами
-% 	showstringspaces=false,      % показывать или нет пробелы в строках
-% 	showtabs=false,             % показывать или нет табуляцию в строках
-% 	frame=single,              % рисовать рамку вокруг кода
-% 	tabsize=2,                 % размер табуляции по умолчанию равен 2 пробелам
-% 	captionpos=t,              % позиция заголовка вверху [t] или внизу [b] 
-% 	breaklines=true,           % автоматически переносить строки (да\нет)
-% 	breakatwhitespace=false, % переносить строки только если есть пробел
-% 	escapeinside={\#*}{*)},   % если нужно добавить комментарии в коде
-% 	abovecaptionskip=-5pt
-% }
-% Мой листинг
 \lstset{ %
-  inputencoding=utf8,
-  basicstyle=\scriptsize, % размер и начертание шрифта для подсветки кода
-  numbers=left,               % где поставить нумерацию строк (слева\справа
-  numberstyle=\scriptsize,           % размер шрифта для номеров строк
-  stepnumber=1,                   % размер шага между двумя номерами строк
-  numbersep=5pt,                % как далеко отстоят номера строк от подсвечиваемого кода
-  showspaces=false,            % показывать или нет пробелы специальными отступами
-  showstringspaces=false,      % показывать или нет пробелы в строках
-  showtabs=true,             % показывать или нет табуляцию в строках
-  tab=\quad,
-  frame=single,              % рисовать рамку вокруг кода
-  tabsize=4,                 % размер табуляции по умолчанию равен 2 пробелам
-  captionpos=t,              % позиция заголовка вверху [t] или внизу [b] 
-  breaklines=true,           % автоматически переносить строки (да\нет)
-  breakatwhitespace=false, % переносить строки только если есть пробел
-  escapeinside={\#*}{*)},   % если нужно добавить комментарии в коде
-  abovecaptionskip=-5pt,
-  captionpos=b,
-  float=h!,
-  frame=single,
+	inputencoding=utf8,
+	basicstyle=\scriptsize, % размер и начертание шрифта для подсветки кода
+	numbers=left,               % где поставить нумерацию строк (слева\справа
+	numberstyle=\scriptsize,           % размер шрифта для номеров строк
+	stepnumber=1,                   % размер шага между двумя номерами строк
+	numbersep=5pt,                % как далеко отстоят номера строк от подсвечиваемого кода
+	showspaces=false,            % показывать или нет пробелы специальными отступами
+	showstringspaces=false,      % показывать или нет пробелы в строках
+	showtabs=true,             % показывать или нет табуляцию в строках
+	tab=\quad,
+	frame=single,              % рисовать рамку вокруг кода
+	tabsize=4,                 % размер табуляции по умолчанию равен 2 пробелам
+	captionpos=t,              % позиция заголовка вверху [t] или внизу [b] 
+	breaklines=true,           % автоматически переносить строки (да\нет)
+	breakatwhitespace=false, % переносить строки только если есть пробел
+	escapeinside={\#*}{*)},   % если нужно добавить комментарии в коде
+	abovecaptionskip=-5pt,
+	captionpos=b,
+	float=h!,
+	frame=single,
 }
 
 \pgfplotsset{width=0.85\linewidth, height=0.5\columnwidth}
@@ -172,8 +153,8 @@
 
 \parindent=1.25cm
 
-%\LetLtxMacro\itemold\item
-%\renewcommand{\item}{\itemindent0.75cm\itemold}
+% \LetLtxMacro\itemold\item
+% \renewcommand{\item}{\itemindent0.75cm\itemold}
 
 \def\labelitemi{---}
 \setlist[itemize]{leftmargin=1.25cm, itemindent=0.65cm}
