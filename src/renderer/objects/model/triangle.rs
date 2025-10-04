@@ -1,16 +1,15 @@
 #![allow(dead_code)]
 
-use std::error::Error;
-use std::fs::OpenOptions;
-use std::path::Path;
-
 use crate::renderer::objects::hit::Hit;
 use crate::renderer::objects::material::Material;
 use crate::renderer::objects::model::Model;
 use crate::renderer::objects::ray::{Ray, Unit, Vector, Vector3};
+use serde::{Deserialize, Serialize, Serializer};
+use std::error::Error;
+use std::fs::OpenOptions;
+use std::path::Path;
 
-
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Triangle {
     pub normal: Unit,
     pub points: [Vector; 3],
@@ -22,7 +21,11 @@ impl Triangle {
     pub fn new(normal: Unit, points: &[Vector3; 3]) -> Self {
         Triangle {
             normal,
-            points: [points[0].to_homogeneous(), points[1].to_homogeneous(), points[2].to_homogeneous()],
+            points: [
+                points[0].to_homogeneous(),
+                points[1].to_homogeneous(),
+                points[2].to_homogeneous(),
+            ],
             area: (points[2] - points[0])
                 .cross(&(points[1] - points[0]))
                 .norm()
@@ -34,7 +37,8 @@ impl Triangle {
     pub fn point_in(&self, point: &Vector) -> bool {
         let mut area = self.area;
         for i in 0..3 {
-            let side = Vector3::from_homogeneous(self.points[i] - self.points[(i + 1) % 3]).unwrap();
+            let side =
+                Vector3::from_homogeneous(self.points[i] - self.points[(i + 1) % 3]).unwrap();
             let to_point = Vector3::from_homogeneous(point - self.points[i]).unwrap();
             area -= side.cross(&to_point).norm().abs() / 2.;
         }
@@ -46,27 +50,27 @@ impl Triangle {
     }
 }
 
-
-
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TriangleModel {
-    triangles: Vec<Triangle>,
+    mesh_file: String,
+
+    #[serde(skip)]
+    triangles: Option<Vec<Triangle>>,
+
     material: Material,
 }
 
 impl TriangleModel {
-    pub fn new(triangles: Vec<Triangle>, material: Material) -> Self {
+    pub fn new(mesh_file: String, material: Material) -> Self {
         TriangleModel {
-            triangles,
+            mesh_file,
+            triangles: None,
             material,
         }
     }
 
-    pub fn from_stl<Str: AsRef<Path>>(
-        filename: Str,
-        material: Material,
-    ) -> Result<Self, Box<dyn Error>> {
-        let mut file = OpenOptions::new().read(true).open(filename)?;
+    pub fn load_file(mut self) -> Result<Self, Box<dyn Error>> {
+        let mut file = OpenOptions::new().read(true).open(&self.mesh_file)?;
         let stl = stl_io::read_stl(&mut file)?;
         let triangles = stl
             .faces
@@ -89,14 +93,14 @@ impl TriangleModel {
                         Vector3::new(
                             stl.vertices[idx].0[0].into(),
                             stl.vertices[idx].0[1].into(),
-                            stl.vertices[idx].0[2].into()
+                            stl.vertices[idx].0[2].into(),
                         )
                     }),
                 ))
             })
             .collect();
-
-        Ok(Self::new(triangles, material))
+        self.triangles = Some(triangles);
+        Ok(self)
     }
 }
 
@@ -105,24 +109,28 @@ impl Model for TriangleModel {
         let mut min_t = f64::INFINITY;
         let mut min_hit: Option<Hit> = None;
 
-        self.triangles.iter().for_each(|triangle| {
-            if -triangle.normal.dot(&ray.direction) < 0. {
-                return;
-            }
+        self.triangles
+            .as_ref()
+            .unwrap()
+            .iter()
+            .for_each(|triangle| {
+                if -triangle.normal.dot(&ray.direction) < 0. {
+                    return;
+                }
 
-            let t = triangle.intersect(ray);
+                let t = triangle.intersect(ray);
 
-            if t < 0. || min_t <= t {
-                return;
-            }
+                if t < 0. || min_t <= t {
+                    return;
+                }
 
-            let hit_pos = ray.origin + ray.direction.scale(t);
+                let hit_pos = ray.origin + ray.direction.scale(t);
 
-            if triangle.point_in(&hit_pos) {
-                min_t = t;
-                min_hit = Some(Hit::new(t, hit_pos, &self.material, triangle.normal));
-            }
-        });
+                if triangle.point_in(&hit_pos) {
+                    min_t = t;
+                    min_hit = Some(Hit::new(t, hit_pos, &self.material, triangle.normal));
+                }
+            });
 
         min_hit
     }

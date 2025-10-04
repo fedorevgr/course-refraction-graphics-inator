@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
 use nalgebra::Unit;
+use serde::{Deserialize, Serialize};
 use crate::renderer::objects::hit::Hit;
 use crate::renderer::objects::material::RgbIntensity;
 use crate::renderer::objects::model::Model;
@@ -8,7 +9,7 @@ use crate::renderer::objects::ray::{Ray, Rgb, Vector};
 use crate::renderer::Renderer;
 use crate::renderer::scene::Scene;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PointLight {
     position: Vector,
     color: RgbIntensity,
@@ -70,7 +71,7 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
 
         self.light_list.iter().map(|light| {
             let light_vector = (light.position - hit.pos).normalize();
-            let cosine = light_vector.dot(&reflected).max(0.).abs().powf(hit.material.k) as f32;
+            let cosine = light_vector.normalize().dot(&reflected).max(0.).abs().powf(hit.material.k) as f32;
             cosine * light.intensity * self._point_light_intensity(light, hit).component_mul(&hit.material.metallic)
         }).sum()
     }
@@ -117,7 +118,7 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
                     intensity += self._cast(&Ray::new(hit.pos, refracted_dir, ior), depth + 1).component_mul(&hit.material.transmittance);
                 }
             }
-            intensity = intensity.component_mul(&hit.material.color) / ((hit.pos - ray.origin).magnitude() as f32 + 1.);
+            intensity = intensity.component_mul(&hit.material.color);
         }
         intensity
     }

@@ -3,6 +3,7 @@
 mod image_generator;
 mod renderer;
 mod tests;
+mod scene_loaders;
 
 use crate::renderer::objects::camera::perspective::PerspectiveCamera;
 use crate::renderer::objects::camera::{Camera, Dimensions};
@@ -14,6 +15,8 @@ use egui::accesskit::Role::Search;
 use egui::{Context, Key};
 use image::{ImageBuffer, RgbImage};
 use std::collections::HashMap as Map;
+use std::fs::File;
+use std::io::{Read, Write};
 use rand::SeedableRng;
 use crate::image_generator::ImageGenerator;
 use crate::image_generator::implementations::one_thread::OneThreaded;
@@ -26,64 +29,20 @@ use crate::renderer::implementations::sampling::{Black, Sampling};
 use crate::renderer::implementations::simple_illumination::SimpleIllumination;
 use crate::renderer::objects::model::sphere::SphereModel;
 use crate::renderer::objects::model::{Model, Move, Rotate};
+use crate::renderer::objects::model::triangle::TriangleModel;
+use crate::scene_loaders::{GlobalIlluminationCollection, GlobalIlluminationCollectionBuilder};
 
 fn main() -> Result<(), eframe::Error> {
-    let camera = PerspectiveCamera::new(
-        Vector::new(5., 0., 0., 0.),
-        Vector::new(0., 0., 0., 0.),
-        Dimensions {
-            width: 1200,
-            height: 800,
-        },
-        std::f64::consts::FRAC_PI_6 / 1.,
-    );
-
-    let scene = Scene::new(vec![
-        SphereModel::new(
-            Vector::from([0.; 4]),
-            1.,
-            MaterialBuilder::default()
-                .color([1.; 3].into())
-                .roughness([0.; 3].into())
-                .metallic([0.; 3].into())
-                .transmittance([1.; 3].into())
-                .ambient([0.; 3].into())
-                .ior(1.3)
-                .build()
-                .unwrap(),
-        ),
-        SphereModel::new(
-            Vector::from([-3., 0., 1., 0.]),
-            0.5,
-            MaterialBuilder::default()
-                .color([0.5, 0.2, 0.2].into())
-                .roughness([0.8; 3].into())
-                .metallic([0.2; 3].into())
-                .ambient([0.3; 3].into())
-                .build()
-                .unwrap(),
-        ),
-        // SphereModel::new(
-        //     Vector::from([0., 0., -30.19, 0.]),
-        //     59. / 2.,
-        //     MaterialBuilder::default()
-        //         .color([0.5; 3].into())
-        //         .roughness([1.; 3].into())
-        //         .metallic([0.; 3].into())
-        //         .build()
-        //         .unwrap(),
-        // ),
-    ]);
+    let mut file = File::open("./scene_data.yaml").unwrap();
+    let mut data = String::new();
+    file.read_to_string(&mut data).unwrap();
+    let collection = GlobalIlluminationCollection::load(&data).unwrap();
 
     let renderer = GlobalIllumination::new(
-        scene,
-        vec![PointLight::new(
-            [0., -2., 2., 0.].into(),
-            30.,
-            [1., 1., 1.].into(),
-        )],
+        collection.scene,
+        collection.lights,
         5,
-        Solid::new([0.8; 3].into()),
+        Solid::new([0.; 3].into()),
         //WithSky{}
     );
     // let renderer = SimpleIllumination::new(scene);
@@ -99,16 +58,17 @@ fn main() -> Result<(), eframe::Error> {
 
     let image_generator = Library::new(1024);
 
-    // let _ = image_generator.create(&camera, &renderer).save("artifacts/Test.png").unwrap();
-    // Ok(())
+    let _ = image_generator.create(&collection.cameras[0], &renderer).save("artifacts/Test.png").unwrap();
+    Ok(())
 
-    eframe::run_native(
-        "Image Viewer",
-        options,
-        Box::new(|cc| Ok(Box::new(Viewer::new(cc, camera, renderer, image_generator)))),
-    )
+    // eframe::run_native(
+    //     "Image Viewer",
+    //     options,
+    //     Box::new(|cc| Ok(Box::new(Viewer::new(cc, collection.cameras[0].clone(), renderer, image_generator)))),
+    // )
 }
 
+#[allow(dead_code)]
 struct Viewer<C, G, R>
 where
     R: Renderer,
@@ -124,7 +84,7 @@ where
 
     frame_rate: f64,
 }
-
+#[allow(dead_code)]
 impl<C, G, R> Viewer<C, G, R>
 where
     R: Renderer,
@@ -139,6 +99,7 @@ where
     const LEFT: Vector = Vector::new(-Self::POSITION_STEP, 0., 0., 0.);
     const UP: Vector = Vector::new(0., Self::POSITION_STEP, 0., 0.);
     const DOWN: Vector = Vector::new(0., -Self::POSITION_STEP, 0., 0.);
+
 
     pub fn new(cc: &eframe::CreationContext<'_>, camera: C, renderer: R, generator: G) -> Self {
         let time = std::time::Instant::now();
@@ -203,6 +164,7 @@ where
         ctx.load_texture("image", for_texture, egui::TextureOptions::default())
     }
 }
+#[allow(dead_code)]
 impl<C, G, R> eframe::App for Viewer<C, G, R>
 where
     R: Renderer,
@@ -238,4 +200,109 @@ where
             });
 
     }
+}
+
+#[allow(dead_code)]
+fn glen_scene() -> Scene<TriangleModel>{
+    Scene::new(vec![
+        TriangleModel::new(
+            "test_data/glen/glen.stl".into(),
+            MaterialBuilder::default()
+                .color([0.8, 0.3, 0.9].into())
+                .roughness([0.0; 3].into())
+                .ior(1.3)
+                .transmittance([1.; 3].into())
+                .ambient([0.; 3].into())
+                .metallic([0.; 3].into())
+                .build()
+                .unwrap()
+        ).load_file().unwrap().to_owned(),
+        TriangleModel::new(
+            "test_data/glen/floor.stl".into(),
+            MaterialBuilder::default()
+                .color([0.6; 3].into())
+                .roughness([1.0; 3].into())
+                .build()
+                .unwrap()
+
+        ).load_file().unwrap().to_owned(),
+        TriangleModel::new(
+            "test_data/glen/walls.stl".into(),
+            MaterialBuilder::default()
+                .color([0.4, 0.8, 0.4].into())
+                .roughness([1.0; 3].into())
+                .build()
+                .unwrap()
+
+        ).load_file().unwrap().to_owned(),
+    ])
+}
+
+#[allow(dead_code)]
+fn box_scene() -> Scene<TriangleModel> {
+    Scene::new(vec![
+        TriangleModel::new(
+            "test_data/Box_Center.stl".into(),
+            MaterialBuilder::default()
+                .color([1., 1., 1.].into())
+                .roughness([0.2; 3].into())
+                .metallic([1.; 3].into())
+                .transmittance([1.; 3].into())
+                .k(2.)
+                .ior(2.)
+                .build()
+                .unwrap()
+
+        ).load_file().unwrap().to_owned(),
+        TriangleModel::new(
+            "test_data/Box_Solid.stl".into(),
+            MaterialBuilder::default()
+                .color([0.1, 0.8, 0.3].into())
+                .roughness([0.8; 3].into())
+                .metallic([0.2; 3].into())
+                .build()
+                .unwrap()
+
+        ).load_file().unwrap().to_owned()
+    ])
+}
+
+#[allow(dead_code)]
+fn sphere_scene() -> Scene<SphereModel> {
+    Scene::new(vec![
+            SphereModel::new(
+                Vector::from([0.; 4]),
+                1.,
+                MaterialBuilder::default()
+                    .color([1.; 3].into())
+                    .roughness([0.; 3].into())
+                    .metallic([0.; 3].into())
+                    .transmittance([1.; 3].into())
+                    .ambient([0.; 3].into())
+                    .ior(1.3)
+                    .build()
+                    .unwrap(),
+            ),
+            SphereModel::new(
+                Vector::from([-3., 0., 1., 0.]),
+                0.5,
+                MaterialBuilder::default()
+                    .color([0.5, 0.2, 0.2].into())
+                    .roughness([0.8; 3].into())
+                    .metallic([0.2; 3].into())
+                    .ambient([0.3; 3].into())
+                    .build()
+                    .unwrap(),
+            ),
+            SphereModel::new(
+                Vector::from([0., 0., -30.19, 0.]),
+                59. / 2.,
+                MaterialBuilder::default()
+                    .color([0.5; 3].into())
+                    .roughness([1.; 3].into())
+                    .metallic([0.; 3].into())
+                    .build()
+                    .unwrap(),
+            )
+        ])
 }

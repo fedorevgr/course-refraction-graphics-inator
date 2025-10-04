@@ -2,8 +2,9 @@
 
 pub use crate::renderer::objects::ray::{RgbIntensity};
 use derive_builder::Builder;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Builder)]
+#[derive(Debug, Clone, Builder, Serialize, Deserialize)]
 pub struct Material {
     #[builder(default = RgbIntensity::from([0.; 3]))]
     pub color: RgbIntensity,

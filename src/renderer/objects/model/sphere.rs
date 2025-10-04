@@ -1,10 +1,12 @@
 #![allow(dead_code)]
+
+use serde::{Deserialize, Serialize};
 use crate::renderer::objects::hit::Hit;
 use crate::renderer::objects::material::Material;
 use crate::renderer::objects::model::Model;
 use crate::renderer::objects::ray::{Ray, Unit, Vector};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct SphereModel {
     center: Vector,
     radius_sq: f64,

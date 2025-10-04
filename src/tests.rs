@@ -42,14 +42,14 @@ fn test_simple_renderer_triangle_model() {
     );
 
     let renderer = Sampling::new(Scene::new(vec![
-        TriangleModel::from_stl(
-            "../test_data/mesh.stl",
+        TriangleModel::new(
+            "../test_data/mesh.stl".into(),
             MaterialBuilder::default()
                 .color(Rgb::from_pixel([140, 200, 80]))
                 .metallic(Rgb::from_pixel([120, 120, 120]))
                 .roughness(Rgb::from_pixel([200, 200, 200]))
                 .k(4.).build().unwrap()
-        ).unwrap()
+        ).load_file().unwrap().to_owned()
     ]), Black{}, 3, rand_pcg::Pcg64Mcg::seed_from_u64(0), 50);
 
     Common::generate_image("triangle_model.png", &cam, &renderer);

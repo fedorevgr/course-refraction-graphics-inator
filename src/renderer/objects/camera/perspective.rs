@@ -1,8 +1,9 @@
+use serde::{Deserialize, Serialize};
 use crate::renderer::objects::camera::{Camera, Dimensions};
 use crate::renderer::objects::model::{Move, Rotate};
 use crate::renderer::objects::ray::{Matrix, Ray, Unit, Vector, Vector3};
 
-#[derive(Clone)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct Rotation {
     pub pitch: f64,
     pub yaw: f64,
@@ -49,7 +50,7 @@ impl Rotation {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PerspectiveCamera {
     pos: Vector,
 

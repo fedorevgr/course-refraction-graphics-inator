@@ -37,34 +37,6 @@ impl Rgb {
     }
 }
 
-// #[inline]
-// pub fn multiply_high_byte(a: u8, b: u8) -> u8 {
-//     (((a as u16) * (b as u16) ) >> 8) as u8
-// }
-// pub fn multiply_rgb(a: &RgbIntensity, b: &RgbIntensity) -> RgbIntensity {
-//     RgbIntensity::new(
-//         multiply_high_byte(a.x, b.x),
-//         multiply_high_byte(a.y, b.y),
-//         multiply_high_byte(a.z, b.z)
-//     )
-// }
-//
-// pub fn scale_rgb(a: &RgbIntensity, b: u8) -> RgbIntensity {
-//     RgbIntensity::new(
-//         multiply_high_byte(a.x, b),
-//         multiply_high_byte(a.y, b),
-//         multiply_high_byte(a.z, b)
-//     )
-// }
-//
-// pub fn saturating_add(a: &RgbIntensity, b: &RgbIntensity) -> RgbIntensity {
-//     RgbIntensity::new(
-//         a.x.saturating_add(b.x),
-//         a.y.saturating_add(b.y),
-//         a.z.saturating_add(b.z)
-//     )
-// }
-
 #[derive(Debug, Clone)]
 pub struct Ray {
     pub origin: Vector,
@@ -149,17 +121,14 @@ mod tests {
         assert_relative_eq!(refracted, refracted_2);
     }
 
-    // #[test]
-    // fn test_glass_refracted_displacement() {
-    //     let norm = Unit::new_normalize([0., 1., 1., 0.].into());
-    //     let ior = 1.33;
-    //     let start_ray = Ray::new([0., 0., 2., 0.].into(), -Vector::z_axis(), 1.);
-    //
-    //     let phi = (ior * std::f64::consts::FRAC_PI_4.sin()).asin();
-    //     let shift = (phi + std::f64::consts::FRAC_PI_4).sin() * std::f64::consts::SQRT_2 * phi.cos();
-    //
-    //     let first_refracted = Ray::new([0.; 4].into(), start_ray.refracted_dir(&norm, ior).unwrap(), ior);
-    //
-    //
-    // }
+    #[test]
+    fn test_direction_conservation() {
+        let plane_normal = Unit::new_normalize([1., 1., 1., 0.].into());
+
+        let direction = Unit::new_normalize([0., 0.,  -1., 0.].into());
+        let direction_2 = Ray::new([0., 0., 0., 0.].into(), direction, 1.).refracted_dir(&plane_normal, 1.5).unwrap();
+        let direction_res = Ray::new([0.; 4].into(), direction_2, 1.5).refracted_dir(&-plane_normal, 1.).unwrap();
+
+        assert_relative_eq!(direction, direction_res);
+    }
 }

@@ -7,11 +7,15 @@ edition = "2024"
 [dependencies]
 
 stl_io = "0.8.5"
-nalgebra = "0.33.2"
+nalgebra = { version = "0.33.2", features = ["serde-serialize"] }
 image = "0.25.6"
 derive_builder = "*"
 rayon = "*"
 rand = "0.9.1"
+
+serde = { version = "*", features = ["derive"] }
+serde_yaml = "*"
+glam = "*"
 
 rand_chacha = "0.9"
 rand_xoshiro = "0.7.0"

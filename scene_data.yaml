@@ -1,0 +1,145 @@
+lights:
+- position:
+  - 10.0
+  - -5.0
+  - 10.0
+  - 0.0
+  color:
+  - 1.0
+  - 1.0
+  - 1.0
+  intensity: 40.0
+cameras:
+- pos:
+  - 5.0
+  - -5.0
+  - 3.0
+  - 0.0
+  rotation:
+    pitch: 1.2951535275786312
+    yaw: 0.7853981633974483
+    roll: 0.0
+    yaw_matrix:
+    - 0.7071067811865476
+    - 0.7071067811865475
+    - 0.0
+    - 0.0
+    - -0.7071067811865475
+    - 0.7071067811865476
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 1.0
+    pitch_matrix:
+    - 1.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.2721655269759087
+    - 0.9622504486493763
+    - 0.0
+    - 0.0
+    - -0.9622504486493763
+    - 0.2721655269759087
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 1.0
+  fov: 0.5235987755982989
+  dims:
+    width: 1600
+    height: 1200
+scene:
+  objects:
+  - mesh_file: test_data/glen/glen.stl
+    material:
+      color:
+      - 0.8
+      - 0.3
+      - 0.9
+      emissivity:
+      - 0.0
+      - 0.0
+      - 0.0
+      metallic:
+      - 0.0
+      - 0.0
+      - 0.0
+      roughness:
+      - 0.0
+      - 0.0
+      - 0.0
+      transmittance:
+      - 1.0
+      - 1.0
+      - 1.0
+      ambient:
+      - 0.0
+      - 0.0
+      - 0.0
+      k: 1.0
+      ior: 1.3
+  - mesh_file: test_data/glen/floor.stl
+    material:
+      color:
+      - 0.6
+      - 0.6
+      - 0.6
+      emissivity:
+      - 0.0
+      - 0.0
+      - 0.0
+      metallic:
+      - 0.0
+      - 0.0
+      - 0.0
+      roughness:
+      - 1.0
+      - 1.0
+      - 1.0
+      transmittance:
+      - 0.0
+      - 0.0
+      - 0.0
+      ambient:
+      - 0.0
+      - 0.0
+      - 0.0
+      k: 1.0
+      ior: 1.0
+  - mesh_file: test_data/glen/walls.stl
+    material:
+      color:
+      - 0.4
+      - 0.8
+      - 0.4
+      emissivity:
+      - 0.0
+      - 0.0
+      - 0.0
+      metallic:
+      - 0.0
+      - 0.0
+      - 0.0
+      roughness:
+      - 1.0
+      - 1.0
+      - 1.0
+      transmittance:
+      - 0.0
+      - 0.0
+      - 0.0
+      ambient:
+      - 0.0
+      - 0.0
+      - 0.0
+      k: 1.0
+      ior: 1.0
