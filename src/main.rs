@@ -59,8 +59,10 @@ fn main() -> Result<(), eframe::Error> {
 
     let image_generator = Library::new(1024);
 
-
+    let time = std::time::Instant::now();
     let _ = image_generator.create(&collection.cameras[0], &renderer).save("artifacts/Test.png").unwrap();
+    dbg!(time.elapsed().as_secs_f64());
+
     Ok(())
 
     // eframe::run_native(
