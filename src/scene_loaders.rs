@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 use crate::renderer::implementations::global_illumination::PointLight;

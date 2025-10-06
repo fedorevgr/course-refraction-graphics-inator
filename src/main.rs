@@ -19,6 +19,7 @@ use std::fs::File;
 use std::io::{Read, Write};
 use rand::SeedableRng;
 use crate::image_generator::ImageGenerator;
+use crate::image_generator::implementations::multithread::MultiThread;
 use crate::image_generator::implementations::one_thread::OneThreaded;
 use crate::image_generator::implementations::rayon::Library;
 use crate::renderer::Renderer;
@@ -57,6 +58,7 @@ fn main() -> Result<(), eframe::Error> {
     };
 
     let image_generator = Library::new(1024);
+
 
     let _ = image_generator.create(&collection.cameras[0], &renderer).save("artifacts/Test.png").unwrap();
     Ok(())
