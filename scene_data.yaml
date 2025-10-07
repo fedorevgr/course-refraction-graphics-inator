@@ -55,8 +55,8 @@ cameras:
     - 1.0
   fov: 0.5235987755982989
   dims:
-    width: 3840
-    height: 2160
+    width: 1920
+    height: 1080
 scene:
   objects:
   - mesh_file: test_data/glen/glen.stl
