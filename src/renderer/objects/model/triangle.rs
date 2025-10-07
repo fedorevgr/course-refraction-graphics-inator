@@ -75,7 +75,8 @@ impl BoundingVolume {
         if d < 0. {
             false
         } else {
-            let t = -b - d.sqrt(); // (-b - d.sqrt()) / 2.
+            let t = -b + d.sqrt();
+            // + sqrt(d) -- as point can be inside
             if t < 0. {
                 return false;
             }
@@ -162,7 +163,7 @@ impl TriangleModel {
 impl Model for TriangleModel {
     fn hit(&self, ray: &Ray) -> Option<Hit> {
         if ! self.bounding_box.hit(ray) {
-            return None;
+            return None; // todo темный потому что логика пересечения не та
         }
 
         let mut min_t = f64::INFINITY;

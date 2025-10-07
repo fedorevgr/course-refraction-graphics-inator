@@ -61,16 +61,16 @@ fn main() -> Result<(), eframe::Error> {
     let image_generator = Library::new(1024);
 
     let time = std::time::Instant::now();
-    // let _ = image_generator.create(&collection.cameras[0], &renderer).save("artifacts/Test.png").unwrap();
-    // dbg!(time.elapsed().as_secs_f64());
-    //
-    // Ok(())
+    let _ = image_generator.create(&collection.cameras[0], &renderer).save("artifacts/Test.png").unwrap();
+    dbg!(time.elapsed().as_secs_f64());
 
-    eframe::run_native(
-        "Image Viewer",
-        options,
-        Box::new(|cc| Ok(Box::new(Viewer::new(cc, collection.cameras[0].clone(), renderer, image_generator)))),
-    )
+    Ok(())
+
+    // eframe::run_native(
+    //     "Image Viewer",
+    //     options,
+    //     Box::new(|cc| Ok(Box::new(Viewer::new(cc, collection.cameras[0].clone(), renderer, image_generator)))),
+    // )
 }
 
 #[allow(dead_code)]
