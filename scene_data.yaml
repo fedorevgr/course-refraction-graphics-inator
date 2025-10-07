@@ -8,7 +8,7 @@ lights:
   - 1.0
   - 1.0
   - 1.0
-  intensity: 40.0
+  intensity: 500.0
 cameras:
 - pos:
   - 5.0
@@ -55,11 +55,11 @@ cameras:
     - 1.0
   fov: 0.5235987755982989
   dims:
-    width: 1920
-    height: 1080
+    width: 1600
+    height: 900
 scene:
   objects:
-  - mesh_file: test_data/glen/glen.stl
+  - mesh_file:  test_data/glen/glen.stl #  test_data/Cube.stl #
     material:
       color:
       - 0.8
@@ -78,9 +78,9 @@ scene:
       - 0.0
       - 0.0
       transmittance:
-      - 1.0
-      - 1.0
-      - 1.0
+      - 0.9
+      - 0.9
+      - 0.9
       ambient:
       - 0.0
       - 0.0
