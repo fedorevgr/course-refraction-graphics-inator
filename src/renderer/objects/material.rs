@@ -19,16 +19,19 @@ pub struct Material {
     pub roughness: RgbIntensity,
 
     #[builder(default = RgbIntensity::from([0.; 3]))]
-    pub transmittance: RgbIntensity,
-
-    #[builder(default = RgbIntensity::from([0.; 3]))]
     pub ambient: RgbIntensity,
 
     #[builder(default = 1.)]
     pub k: f64,
 
     #[builder(default = 1.0)]
-    pub ior: f64
+    pub ior: f64,
+    
+    #[builder(default = false)]
+    pub transmission: bool,
+    
+    #[builder(default = RgbIntensity::from([0.; 3]))]
+    pub transmittance: RgbIntensity,
 }
 
 impl Material {
@@ -61,6 +64,7 @@ impl Default for Material {
             ambient: RgbIntensity::from([0.; 3]),
             k: 0.,
             ior: 1.,
+            transmission: false,
         }
     }
 }

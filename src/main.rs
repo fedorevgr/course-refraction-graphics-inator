@@ -44,7 +44,7 @@ fn main() -> Result<(), eframe::Error> {
         collection.scene,
         collection.lights,
         5,
-        Solid::new([0.; 3].into()),
+        Solid::new([0.0; 3].into()),
         //WithSky{}
     );
     // let renderer = SimpleIllumination::new(scene);

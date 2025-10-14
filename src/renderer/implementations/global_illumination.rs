@@ -80,43 +80,6 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
         }
     }
 
-    fn _specular(&self, ray: &Ray, hit: &Hit) -> RgbIntensity {
-        let reflected = ray.reflected_dir(&hit.normal);
-
-        self.light_list
-            .iter()
-            .map(|light| {
-                let light_vector = (light.position - hit.pos).normalize();
-                let cosine = light_vector
-                    .normalize()
-                    .dot(&reflected)
-                    .max(0.)
-                    .abs()
-                    .powf(hit.material.k) as f32;
-                cosine
-                    * light.intensity
-                    * self
-                        ._point_light_intensity(light, hit)
-                        .component_mul(&hit.material.metallic)
-            })
-            .sum()
-    }
-
-    fn _diffusive(&self, _ray: &Ray, hit: &Hit) -> RgbIntensity {
-        self.light_list
-            .iter()
-            .map(|light| {
-                let light_vector = (light.position - hit.pos).normalize();
-                let cosine = light_vector.dot(&hit.normal).max(0.).abs() as f32;
-                cosine
-                    * light.intensity
-                    * self
-                        ._point_light_intensity(light, hit)
-                        .component_mul(&hit.material.roughness)
-            })
-            .sum()
-    }
-
     fn _ambient(&self, ray: &Ray, hit: &Option<Hit>) -> RgbIntensity {
         self.ambient.evaluate(ray, hit)
     }
@@ -130,13 +93,30 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
         let mut light_absorbed: RgbIntensity = [1.; 3].into();
 
         while let Some(hit) = self.scene.intersect(&light_ray) {
-            if hit.normal.dot(&dir) < 0. {
-                light_absorbed = light_absorbed.component_mul(&hit.material.transmittance).component_mul(&hit.material.color);
+            if hit.material.transmission {
+                if hit.normal.dot(&dir) < 0. {
+                    light_absorbed = light_absorbed.component_mul(&hit.material.transmittance).component_mul(&hit.material.color);
+                }
+            } else {
+                light_absorbed = RgbIntensity::zeros();
+                break;
             }
+
             light_ray.origin = hit.pos;
 
         }
-        light.color.component_mul(&light_absorbed) / (distance as f32 + 1.).powf(2.)
+        light.color.component_mul(&light_absorbed) * light.intensity / (distance as f32 + 1.).powf(2.)
+    }
+
+    fn _light_exposure(&self, ray: &Ray, hit: &Hit) -> RgbIntensity {
+        self.light_list.iter().map(|light| {
+            let light_vector = (light.position - hit.pos).normalize();
+
+            (
+                hit.material.roughness * (hit.normal.dot(&light_vector).max(0.0) as f32) +
+                    hit.material.metallic * (ray.reflected_dir(&hit.normal).dot(&light_vector).max(0.0).powf(hit.material.k) as f32)
+            ).component_mul(&self._point_light_intensity(light, hit))
+        }).sum()
     }
 
     fn _cast(&self, ray: &Ray, depth: usize) -> RgbIntensity {
@@ -144,7 +124,7 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
         let mut intensity = self._ambient(ray, &ray_hit);
 
         if let Some(hit) = ray_hit {
-            intensity += self._diffusive(ray, &hit) + self._specular(ray, &hit);
+            intensity += self._light_exposure(ray, &hit);
 
             if depth < self.bounce_limit {
                 intensity += self
@@ -159,7 +139,8 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
                 } else {
                     1.0
                 };
-                if let Some(refracted_dir) = ray.refracted_dir(&hit.normal, ior) {
+
+                if hit.material.transmission && let Some(refracted_dir) = ray.refracted_dir(&hit.normal, ior) {
                     intensity += self
                         ._cast(&Ray::new(hit.pos, refracted_dir, ior), depth + 1)
                         .component_mul(&hit.material.transmittance);
