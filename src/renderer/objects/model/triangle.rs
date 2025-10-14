@@ -20,7 +20,7 @@ pub struct Triangle {
 }
 
 impl Triangle {
-    const EPSILON: f64 = 1e-9;
+    const EPSILON: f64 = 1e-6;
     pub fn new(normal: Unit, indexes: [usize; 3], points: Rc<Vec<Vector>>) -> Self {
         Triangle {
             normal,

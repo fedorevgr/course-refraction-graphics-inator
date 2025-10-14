@@ -53,14 +53,14 @@ impl Ray {
     pub fn refracted_dir(&self, normal: &Unit, env_nu: f64) -> Option<Unit>
     {
         let dot_prod = self.direction.dot(normal);
-        let norm = if dot_prod > 0. {normal.scale(-1.)} else { *normal.clone() };
+        let norm = if dot_prod >= 0. {normal.scale(-1.)} else { *normal.clone() };
 
         let r = self.ior / env_nu;
         let c = -self.direction.dot(&norm);
 
         let d = 1. - r * r * (1.0 - c * c);
 
-        if d <= 0. {
+        if d < 0. {
             None
         }
         else {

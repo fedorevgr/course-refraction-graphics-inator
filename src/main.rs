@@ -35,7 +35,7 @@ use crate::renderer::objects::model::triangle::TriangleModel;
 use crate::scene_loaders::{GlobalIlluminationCollection, GlobalIlluminationCollectionBuilder};
 
 fn main() -> Result<(), eframe::Error> {
-    let mut file = File::open("./scene_data.yaml").unwrap();
+    let mut file = File::open("./pencil.yaml").unwrap();
     let mut data = String::new();
     file.read_to_string(&mut data).unwrap();
     let collection = GlobalIlluminationCollection::load(&data).unwrap();
@@ -43,8 +43,8 @@ fn main() -> Result<(), eframe::Error> {
     let renderer = GlobalIllumination::new(
         collection.scene,
         collection.lights,
-        5,
-        Solid::new([0.0; 3].into()),
+        4,
+        Solid::new([0.5; 3].into()),
         //WithSky{}
     );
     // let renderer = SimpleIllumination::new(scene);
@@ -60,17 +60,17 @@ fn main() -> Result<(), eframe::Error> {
 
     let image_generator = Library::new(1024);
 
-    let time = std::time::Instant::now();
-    let _ = image_generator.create(&collection.cameras[0], &renderer).save("artifacts/Test.png").unwrap();
-    dbg!(time.elapsed().as_secs_f64());
+    // let time = std::time::Instant::now();
+    // let _ = image_generator.create(&collection.cameras[0], &renderer).save("artifacts/Test.png").unwrap();
+    // dbg!(time.elapsed().as_secs_f64());
 
-    Ok(())
+    // Ok(())
 
-    // eframe::run_native(
-    //     "Image Viewer",
-    //     options,
-    //     Box::new(|cc| Ok(Box::new(Viewer::new(cc, collection.cameras[0].clone(), renderer, image_generator)))),
-    // )
+    eframe::run_native(
+        "Image Viewer",
+        options,
+        Box::new(|cc| Ok(Box::new(Viewer::new(cc, collection.cameras[0].clone(), renderer, image_generator)))),
+    )
 }
 
 #[allow(dead_code)]
