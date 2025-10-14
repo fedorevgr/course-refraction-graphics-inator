@@ -84,7 +84,6 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
         self.ambient.evaluate(ray, hit)
     }
 
-    #[inline]
     fn _point_light_intensity(&self, light: &PointLight, hit: &Hit) -> RgbIntensity {
         let dir = light.position - hit.pos;
         let distance = dir.magnitude();
@@ -95,7 +94,9 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
         while let Some(hit) = self.scene.intersect(&light_ray) {
             if hit.material.transmission {
                 if hit.normal.dot(&dir) < 0. {
-                    light_absorbed = light_absorbed.component_mul(&hit.material.transmittance).component_mul(&hit.material.color);
+                    light_absorbed = light_absorbed
+                        .component_mul(&hit.material.transmittance)
+                        .component_mul(&hit.material.color);
                 }
             } else {
                 light_absorbed = RgbIntensity::zeros();
@@ -103,23 +104,30 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
             }
 
             light_ray.origin = hit.pos;
-
         }
-        light.color.component_mul(&light_absorbed) * light.intensity / (distance as f32 + 1.).powf(2.)
+        light.color.component_mul(&light_absorbed) * light.intensity
+            / (distance as f32 + 1.).powf(2.)
     }
 
     fn _light_exposure(&self, ray: &Ray, hit: &Hit) -> RgbIntensity {
-        self.light_list.iter().map(|light| {
-            let light_vector = (light.position - hit.pos).normalize();
+        self.light_list
+            .iter()
+            .map(|light| {
+                let light_vector = (light.position - hit.pos).normalize();
 
-            (
-                hit.material.roughness * (hit.normal.dot(&light_vector).max(0.0) as f32) +
-                    hit.material.metallic * (ray.reflected_dir(&hit.normal).dot(&light_vector).max(0.0).powf(hit.material.k) as f32)
-            ).component_mul(&self._point_light_intensity(light, hit))
-        }).sum()
+                (hit.material.roughness * (hit.normal.dot(&light_vector).max(0.0) as f32)
+                    + hit.material.metallic
+                        * (ray
+                            .reflected_dir(&hit.normal)
+                            .dot(&light_vector)
+                            .max(0.0)
+                            .powf(hit.material.k) as f32))
+                    .component_mul(&self._point_light_intensity(light, hit))
+            })
+            .sum()
     }
 
-    fn _cast(&self, ray: &Ray, depth: usize) -> RgbIntensity {
+    fn _cast(&self, ray: &Ray, depth: usize, mut ior_stack: Vec<f64>) -> RgbIntensity {
         let ray_hit = self.scene.intersect(ray);
         let mut intensity = self._ambient(ray, &ray_hit);
 
@@ -131,19 +139,23 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
                     ._cast(
                         &Ray::new(hit.pos, ray.reflected_dir(&hit.normal), ray.ior),
                         depth + 1,
+                        ior_stack.clone(),
                     )
                     .component_mul(&hit.material.metallic);
 
-                let ior = if hit.normal.dot(&ray.direction) <= 0. {
-                    hit.material.ior
-                } else {
-                    1.0
-                };
+                if hit.material.transmission {
+                    let ior = if hit.normal.dot(&ray.direction) <= 0. {
+                        ior_stack.push(hit.material.ior);
+                        hit.material.ior
+                    } else {
+                        ior_stack.pop().unwrap()
+                    };
 
-                if hit.material.transmission && let Some(refracted_dir) = ray.refracted_dir(&hit.normal, ior) {
-                    intensity += self
-                        ._cast(&Ray::new(hit.pos, refracted_dir, ior), depth + 1)
-                        .component_mul(&hit.material.transmittance);
+                    if let Some(refracted_dir) = ray.refracted_dir(&hit.normal, ior) {
+                        intensity += self
+                            ._cast(&Ray::new(hit.pos, refracted_dir, ior), depth + 1, ior_stack)
+                            .component_mul(&hit.material.transmittance);
+                    }
                 }
             }
             intensity = intensity.component_mul(&hit.material.color);
@@ -154,6 +166,6 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
 
 impl<M: Model, A: Ambient> Renderer for GlobalIllumination<M, A> {
     fn cast(&self, ray: &Ray) -> RgbIntensity {
-        self._cast(ray, 0)
+        self._cast(ray, 0, [1.0].into())
     }
 }
