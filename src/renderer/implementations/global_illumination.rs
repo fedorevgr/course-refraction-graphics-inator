@@ -66,6 +66,8 @@ pub struct GlobalIllumination<M: Model, A: Ambient> {
 }
 
 impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
+    const EPSILON: f64 = 1e-5;
+
     pub fn new(
         scene: Scene<M>,
         light_list: Vec<PointLight>,
@@ -85,10 +87,11 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
     }
 
     fn _point_light_intensity(&self, light: &PointLight, hit: &Hit) -> RgbIntensity {
-        let dir = light.position - hit.pos;
-        let distance = dir.magnitude();
+        let dir_unnormed = light.position - hit.pos;
+        let distance = dir_unnormed.magnitude();
+        let dir = Unit::new_normalize(dir_unnormed);
 
-        let mut light_ray = Ray::new(hit.pos, Unit::new_normalize(dir), 1.);
+        let mut light_ray = Ray::new(hit.pos, dir, 1.);
         let mut light_absorbed: RgbIntensity = [1.; 3].into();
 
         while let Some(hit) = self.scene.intersect(&light_ray) {
@@ -103,7 +106,7 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
                 break;
             }
 
-            light_ray.origin = hit.pos;
+            light_ray.origin = hit.pos + dir.scale(1e-6);
         }
         light.color.component_mul(&light_absorbed) * light.intensity
             / (distance as f32 + 1.).powf(2.)
@@ -135,16 +138,17 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
             intensity += self._light_exposure(ray, &hit);
 
             if depth < self.bounce_limit {
+                let reflected_dir = ray.reflected_dir(&hit.normal);
                 intensity += self
                     ._cast(
-                        &Ray::new(hit.pos, ray.reflected_dir(&hit.normal), ray.ior),
+                        &Ray::new(hit.pos + reflected_dir.scale(Self::EPSILON), reflected_dir, ray.ior),
                         depth + 1,
                         ior_stack.clone(),
                     )
                     .component_mul(&hit.material.metallic);
 
                 if hit.material.transmission {
-                    let ior = if hit.normal.dot(&ray.direction) <= 0. {
+                    let ior = if hit.normal.dot(&ray.direction) <= 0. { // todo rethink
                         ior_stack.push(hit.material.ior);
                         hit.material.ior
                     } else {
@@ -153,7 +157,7 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
 
                     if let Some(refracted_dir) = ray.refracted_dir(&hit.normal, ior) {
                         intensity += self
-                            ._cast(&Ray::new(hit.pos, refracted_dir, ior), depth + 1, ior_stack)
+                            ._cast(&Ray::new(hit.pos + refracted_dir.scale(Self::EPSILON), refracted_dir, ior), depth + 1, ior_stack)
                             .component_mul(&hit.material.transmittance);
                     }
                 }
