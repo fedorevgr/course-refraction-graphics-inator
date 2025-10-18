@@ -66,7 +66,7 @@ pub struct GlobalIllumination<M: Model, A: Ambient> {
 }
 
 impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
-    const EPSILON: f64 = 1e-5;
+    const EPSILON: f64 = 1e-6;
 
     pub fn new(
         scene: Scene<M>,
@@ -106,7 +106,7 @@ impl<M: Model, A: Ambient> GlobalIllumination<M, A> {
                 break;
             }
 
-            light_ray.origin = hit.pos + dir.scale(1e-6);
+            light_ray.origin = hit.pos + dir.scale(Self::EPSILON);
         }
         light.color.component_mul(&light_absorbed) * light.intensity
             / (distance as f32 + 1.).powf(2.)
