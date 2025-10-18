@@ -1,0 +1,24 @@
+[package]
+name = "engine"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+stl_io = "0.8.5"
+nalgebra = { version = "0.33.2", features = ["serde-serialize"] }
+image = "0.25.6"
+derive_builder = "*"
+rayon = "*"
+rand = "0.9.1"
+
+serde = { version = "*", features = ["derive"] }
+serde_yaml = "*"
+glam = "*"
+
+rand_chacha = "0.9"
+rand_xoshiro = "0.7.0"
+rand_pcg = "0.9.0"
+
+# Tests
+approx = "*"
+

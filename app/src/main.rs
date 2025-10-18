@@ -1,15 +1,11 @@
 #![allow(unused_imports)]
 
-mod image_generator;
-mod renderer;
-mod tests;
-mod scene_loaders;
 
-use crate::renderer::objects::camera::perspective::PerspectiveCamera;
-use crate::renderer::objects::camera::{Camera, Dimensions};
-use crate::renderer::objects::material::MaterialBuilder;
-use crate::renderer::objects::ray::Vector;
-use crate::renderer::scene::Scene;
+use engine::renderer::objects::camera::perspective::PerspectiveCamera;
+use engine::renderer::objects::camera::{Camera, Dimensions};
+use engine::renderer::objects::material::MaterialBuilder;
+use engine::renderer::objects::ray::Vector;
+use engine::renderer::scene::Scene;
 use eframe::Frame;
 use egui::accesskit::Role::Search;
 use egui::{Context, Key};
@@ -18,21 +14,21 @@ use std::collections::HashMap as Map;
 use std::fs::File;
 use std::io::{Read, Write};
 use rand::SeedableRng;
-use crate::image_generator::ImageGenerator;
-use crate::image_generator::implementations::multithread::MultiThread;
-use crate::image_generator::implementations::one_thread::OneThreaded;
-use crate::image_generator::implementations::rayon::Library;
-use crate::renderer::Renderer;
-use crate::renderer::implementations::global_illumination::{
+use engine::image_generator::ImageGenerator;
+use engine::image_generator::implementations::multithread::MultiThread;
+use engine::image_generator::implementations::one_thread::OneThreaded;
+use engine::image_generator::implementations::rayon::Library;
+use engine::renderer::Renderer;
+use engine::renderer::implementations::global_illumination::{
     GlobalIllumination, PointLight, Solid, WithSky,
 };
 
-use crate::renderer::implementations::sampling::{Black, Sampling};
-use crate::renderer::implementations::simple_illumination::SimpleIllumination;
-use crate::renderer::objects::model::sphere::SphereModel;
-use crate::renderer::objects::model::{Model, Move, Rotate};
-use crate::renderer::objects::model::triangle::TriangleModel;
-use crate::scene_loaders::{GlobalIlluminationCollection, GlobalIlluminationCollectionBuilder};
+use engine::renderer::implementations::sampling::{Black, Sampling};
+use engine::renderer::implementations::simple_illumination::SimpleIllumination;
+use engine::renderer::objects::model::sphere::SphereModel;
+use engine::renderer::objects::model::{Model, Move, Rotate};
+use engine::renderer::objects::model::triangle::TriangleModel;
+use engine::scene_loaders::{GlobalIlluminationCollection, GlobalIlluminationCollectionBuilder};
 
 fn main() -> Result<(), eframe::Error> {
     let mut file = File::open("./pencil.yaml").unwrap();
@@ -275,39 +271,39 @@ fn box_scene() -> Scene<TriangleModel> {
 #[allow(dead_code)]
 fn sphere_scene() -> Scene<SphereModel> {
     Scene::new(vec![
-            SphereModel::new(
-                Vector::from([0.; 4]),
-                1.,
-                MaterialBuilder::default()
-                    .color([1.; 3].into())
-                    .roughness([0.; 3].into())
-                    .metallic([0.; 3].into())
-                    .transmittance([1.; 3].into())
-                    .ambient([0.; 3].into())
-                    .ior(1.3)
-                    .build()
-                    .unwrap(),
-            ),
-            SphereModel::new(
-                Vector::from([-3., 0., 1., 0.]),
-                0.5,
-                MaterialBuilder::default()
-                    .color([0.5, 0.2, 0.2].into())
-                    .roughness([0.8; 3].into())
-                    .metallic([0.2; 3].into())
-                    .ambient([0.3; 3].into())
-                    .build()
-                    .unwrap(),
-            ),
-            SphereModel::new(
-                Vector::from([0., 0., -30.19, 0.]),
-                59. / 2.,
-                MaterialBuilder::default()
-                    .color([0.5; 3].into())
-                    .roughness([1.; 3].into())
-                    .metallic([0.; 3].into())
-                    .build()
-                    .unwrap(),
-            )
-        ])
+        SphereModel::new(
+            Vector::from([0.; 4]),
+            1.,
+            MaterialBuilder::default()
+                .color([1.; 3].into())
+                .roughness([0.; 3].into())
+                .metallic([0.; 3].into())
+                .transmittance([1.; 3].into())
+                .ambient([0.; 3].into())
+                .ior(1.3)
+                .build()
+                .unwrap(),
+        ),
+        SphereModel::new(
+            Vector::from([-3., 0., 1., 0.]),
+            0.5,
+            MaterialBuilder::default()
+                .color([0.5, 0.2, 0.2].into())
+                .roughness([0.8; 3].into())
+                .metallic([0.2; 3].into())
+                .ambient([0.3; 3].into())
+                .build()
+                .unwrap(),
+        ),
+        SphereModel::new(
+            Vector::from([0., 0., -30.19, 0.]),
+            59. / 2.,
+            MaterialBuilder::default()
+                .color([0.5; 3].into())
+                .roughness([1.; 3].into())
+                .metallic([0.; 3].into())
+                .build()
+                .unwrap(),
+        )
+    ])
 }
